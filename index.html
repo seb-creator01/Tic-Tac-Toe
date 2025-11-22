@@ -24,7 +24,7 @@
     grid-template-columns: repeat(3, 100px);
     grid-gap: 10px;
     margin: 20px 0;
-    position: relative; /* Needed for strike-through line */
+    position: relative;
   }
   .cell {
     width: 100px;
@@ -52,7 +52,6 @@
     min-height: 24px;
     font-weight: bold;
   }
-  /* Style for the current player's turn indicator */
   #status span {
     display: inline-block;
     min-width: 30px; 
@@ -110,19 +109,19 @@
     text-align: center;
   }
 
-  /* --- WINNING LINE STYLES (NEW) --- */
+  /* --- WINNING LINE STYLES --- */
   .winning-line {
     position: absolute;
-    background: #ff4081; /* Pink line */
+    background: #ff4081;
     z-index: 10;
-    pointer-events: none; /* Allows clicks on cells below */
+    pointer-events: none;
     opacity: 0.8;
   }
 
-  /* Line dimensions for 3x3 grid (320px wide) */
+  /* Line dimensions for 3x3 grid */
   .line-row-0, .line-row-1, .line-row-2 { height: 10px; width: 320px; left: -10px; }
   .line-col-0, .line-col-1, .line-col-2 { width: 10px; height: 320px; top: -10px; }
-  .line-diag-1, .line-diag-2 { height: 10px; width: 450px; } /* Diagonal is longer */
+  .line-diag-1, .line-diag-2 { height: 10px; width: 450px; } 
 
   .line-row-0 { top: 45px; }
   .line-row-1 { top: 155px; }
@@ -146,7 +145,8 @@
 <body>
 
 <h1>Tic-Tac-Toe</h1>
-<div id="timer"></div> <div id="status">Loading...</div>
+<div id="timer"></div>
+<div id="status">Loading...</div>
 
 <div id="controls">
   <select id="mode-select" title="Select Mode">
@@ -179,7 +179,7 @@
 <footer>Developed by Seb-Creations</footer>
 
 <audio id="bg-music" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/18/audio_b51a469505.mp3?filename=happy-ukulele-4585.mp3" type="audio/mpeg" />
+  <source src="https://opengameart.org/sites/default/files/Happy%20Ukulele%20Background%20Music.mp3" type="audio/mpeg" />
 </audio>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
@@ -226,39 +226,32 @@
   let muted = false;
 
   let timerInterval;
-  const turnTimeLimit = 10; // 10 seconds per turn
+  const turnTimeLimit = 10; 
 
   // Winning combos mapped to CSS line classes for strike-through
   const winningCombos = [
-    // Rows
     { combo: [0, 1, 2], lineClass: 'line-row-0' },
     { combo: [3, 4, 5], lineClass: 'line-row-1' },
     { combo: [6, 7, 8], lineClass: 'line-row-2' },
-    // Columns
     { combo: [0, 3, 6], lineClass: 'line-col-0' },
     { combo: [1, 4, 7], lineClass: 'line-col-1' },
     { combo: [2, 5, 8], lineClass: 'line-col-2' },
-    // Diagonals
-    { combo: [0, 4, 8], lineClass: 'line-diag-1' }, // Top-left to bottom-right
-    { combo: [2, 4, 6], lineClass: 'line-diag-2' }  // Top-right to bottom-left
+    { combo: [0, 4, 8], lineClass: 'line-diag-1' },
+    { combo: [2, 4, 6], lineClass: 'line-diag-2' }
   ];
 
 
   // --- INITIALIZATION AND EVENT LISTENERS ---
 
+  // UPDATED: Removed score clearing logic from resetBtn
   resetBtn.addEventListener('click', () => {
-    if (!isOnline || !gameId) {
-      scores = { X: 0, O: 0, draw: 0 };
-      updateScores();
-    }
     resetGameLocal();
-    // Logic for online reset would go here
+    // Logic for online reset would still go here
   });
   modeSelect.addEventListener('change', initializeGameMode);
   difficultySelect.addEventListener('change', () => difficulty = difficultySelect.value);
   muteBtn.addEventListener('click', toggleMute);
 
-  // Initialize everything on load
   function init() {
     createBoard();
     updateScores();
@@ -269,7 +262,6 @@
 
   // --- CORE GAME LOGIC ---
 
-  // Create board UI
   function createBoard() {
     boardEl.innerHTML = '';
     for (let i = 0; i < 9; i++) {
@@ -281,28 +273,21 @@
     }
   }
 
-  // Handle cell click
   function handleCellClick(index) {
     if (!gameActive || board[index] !== "") return;
 
     const mode = modeSelect.value;
     let allowedToMove = false;
 
-    if (mode === 'single') {
-      allowedToMove = currentPlayer === 'X';
-    } else if (mode === 'local') {
-      allowedToMove = true;
-    } else if (mode === 'online') {
-      allowedToMove = currentPlayer === playerSymbol;
-      // In a real online game, you'd also check if it's the server's current player
-    }
+    if (mode === 'single') { allowedToMove = currentPlayer === 'X'; } 
+    else if (mode === 'local') { allowedToMove = true; } 
+    else if (mode === 'online') { allowedToMove = currentPlayer === playerSymbol; }
 
     if (allowedToMove) {
       makeMove(index, currentPlayer);
     }
   }
 
-  // Execute a move and check game state
   function makeMove(index, symbol) {
     if (!gameActive || board[index] !== "") return;
 
@@ -336,56 +321,47 @@
     } else {
       scores[winner]++;
       updateStatus(`Player ${winner} Wins!`);
-      highlightWinningCells(lineClass); // Use lineClass for strike-through
+      highlightWinningCells(lineClass);
     }
     updateScores();
+    
+    // Auto-reset after 2 seconds to prepare for next game, keeping score
+    setTimeout(resetGameLocal, 2000); 
   }
 
-  // Highlight the winning cells with a strike-through line (NEW FEATURE)
   function highlightWinningCells(lineClass) {
-    // 1. Create the div for the line
     const line = document.createElement('div');
     line.classList.add('winning-line', lineClass);
-
-    // 2. Add it to the board container
     boardEl.appendChild(line);
   }
 
 
   // --- UTILITY FUNCTIONS ---
 
-  // Update board UI (clears previous line)
   function updateBoardUI() {
-    // Clear previous strike-through line
     boardEl.querySelectorAll('.winning-line').forEach(line => line.remove());
 
-    // Update cell contents
     boardEl.querySelectorAll('.cell').forEach(cell => {
       cell.textContent = board[cell.dataset.index];
     });
   }
 
-  // Check win, returns the line class if won
   function checkWin(player) {
     return winningCombos.find(combo =>
       combo.combo.every(index => board[index] === player)
     );
   }
 
-  // Check draw
   function checkDraw() {
     return board.every(cell => cell !== "");
   }
 
-  // Switch player
   function switchPlayer() {
     currentPlayer = currentPlayer === "X" ? "O" : "X";
     updateStatus(`'s turn`);
   }
 
-  // Update status text
   function updateStatus(text) {
-    // Add an indicator for the current player's symbol
     let symbolIndicator = '';
     if (gameActive) {
       symbolIndicator = `<span style="color: ${currentPlayer === 'X' ? '#ff4081' : '#448aff'}; font-size: 1.5em;">${currentPlayer}</span>`;
@@ -393,27 +369,32 @@
     statusEl.innerHTML = `${symbolIndicator} ${text}`;
   }
 
-  // Update scoreboard UI
   function updateScores() {
     xWinsEl.textContent = scores.X;
     oWinsEl.textContent = scores.O;
     drawsEl.textContent = scores.draw;
   }
 
-  // Reset game locally
+  // Resets board only, preserves scores
   function resetGameLocal() {
     board.fill("");
     gameActive = true;
     currentPlayer = "X";
     updateBoardUI();
     updateStatus(`'s turn`);
-    startTimer();
+    
+    // Only start timer if not in online mode
+    if (modeSelect.value !== 'online') {
+        startTimer();
+    } else {
+        clearInterval(timerInterval);
+        timerEl.textContent = '';
+    }
   }
 
 
   // --- TIMER FUNCTIONS ---
   function startTimer() {
-    // Only run timer for Single Player and Local Multiplayer
     if (modeSelect.value === 'online' || !gameActive) {
       clearInterval(timerInterval);
       timerEl.textContent = '';
@@ -432,32 +413,50 @@
         clearInterval(timerInterval);
         const winner = currentPlayer === "X" ? "O" : "X";
         updateStatus(`Time's up! Player ${currentPlayer} forfeits.`);
-        // Immediately end game and give win to opponent
         endGame(winner); 
-        setTimeout(resetGameLocal, 2000); // Start new game after 2 seconds
       }
     }, 1000);
   }
 
 
-  // --- MODE AND MUSIC FUNCTIONS ---
+  // --- MODE AND MUSIC FUNCTIONS (UPDATED Online Logic) ---
 
   function initializeGameMode() {
     const mode = modeSelect.value;
-    // Hide/show relevant controls
     difficultySelect.disabled = mode !== 'single';
-    linkSection.style.display = mode === 'online' ? 'block' : 'none';
     isOnline = mode === 'online';
 
-    // Start a fresh game state for the new mode
     resetGameLocal();
+    
     if (mode === 'online') {
-      updateStatus("Online Mode Selected. Click Reset to join or create a game.");
-      clearInterval(timerInterval); // No local timer in online mode
-      timerEl.textContent = '';
+        // 1. Generate a unique game ID (using Firebase push key)
+        const newGameRef = db.ref('games').push();
+        gameId = newGameRef.key;
+        
+        // 2. Set the initial game state in Firebase
+        newGameRef.set({
+            board: board,
+            currentPlayer: 'X',
+            gameActive: true,
+            playerX: 'host',
+            playerO: null,
+        });
+        playerSymbol = 'X';
+
+        // 3. Create the sharable URL
+        const shareURL = `${window.location.href.split('?')[0]}?game=${gameId}`;
+        
+        // 4. Display the link section
+        gameLink.href = shareURL;
+        gameLink.textContent = shareURL;
+        linkSection.style.display = 'block'; 
+
+        updateStatus(`Waiting for opponent. Share the link!`);
+        clearInterval(timerInterval);
+        timerEl.textContent = '';
     } else {
-      // Start timer for local modes
-      startTimer();
+        linkSection.style.display = 'none';
+        startTimer();
     }
   }
 
@@ -469,7 +468,6 @@
     } else {
       bgMusic.play().catch(e => {
         console.log('Music play failed:', e);
-        // This usually happens if the user hasn't clicked anything yet.
       });
       muteBtn.textContent = '🔊 Mute';
     }
@@ -483,7 +481,6 @@
     const emptyIndices = board.map((v, i) => v === "" ? i : -1).filter(i => i !== -1);
 
     if (difficulty === 'easy' || difficulty === 'normal' || difficulty === 'hard') {
-      // Simple random move for all placeholder difficulties
       moveIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
     }
 
