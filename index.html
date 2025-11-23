@@ -23,9 +23,6 @@
       margin: 0;
       padding: 20px;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
     h1 {
       margin-bottom: 15px;
@@ -133,7 +130,7 @@
       opacity: 0.7;
     }
 
-    /* 💬 Chat Box Styles */
+    /* 💬 Chat Box Styles (Placeholder) */
     #chat-box {
         width: 300px;
         height: 450px;
@@ -141,9 +138,10 @@
         border-radius: 10px;
         padding: 15px;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        display: none; /* Controlled by JS */
+        display: flex;
         flex-direction: column;
         justify-content: space-between;
+        display: none; /* Hide by default, only for online mode */
     }
     #chat-messages {
         flex-grow: 1;
@@ -151,16 +149,6 @@
         padding-right: 10px;
         margin-bottom: 10px;
         font-size: 0.9em;
-        /* Custom scrollbar for aesthetics */
-        scrollbar-width: thin;
-        scrollbar-color: var(--secondary-color) transparent;
-    }
-    #chat-messages::-webkit-scrollbar {
-        width: 8px;
-    }
-    #chat-messages::-webkit-scrollbar-thumb {
-        background-color: var(--secondary-color);
-        border-radius: 4px;
     }
     #chat-input-container {
         display: flex;
@@ -190,6 +178,7 @@
       text-align: left;
       color: white;
     }
+
   </style>
 </head>
 <body>
@@ -218,7 +207,9 @@
     
     <div id="chat-box">
       <div id="chat-messages">
-        </div>
+        <p class="chat-message-you">You: Hey, good luck!</p>
+        <p class="chat-message-other">Opponent: You too, let's play!</p>
+      </div>
       <div id="chat-input-container">
         <input type="text" id="chat-input" placeholder="Type a message..." />
         <button id="chat-send-btn">Send</button>
@@ -226,7 +217,7 @@
     </div>
   </div>
 
-  <footer>Developed by Seb-Creations (Enhanced for difficulty, design, and online play)</footer>
+  <footer>Developed by Seb-Creations (Enhanced for difficulty and design)</footer>
 
   <audio id="bgMusic" loop>
     <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-music-778.mp3" type="audio/mp3">
@@ -234,10 +225,11 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue, push } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    // ** 🔐 Firebase Setup **
+    // ** 🔐 Firebase Setup (Keep confidential keys safe in production!) **
     const firebaseConfig = {
+      // NOTE: Using the provided API key structure.
       apiKey: "AIzaSyAFUoT40IjaiqH2791QvyNUP6SakHarupY",
       authDomain: "tic-tac-toe-9e69d.firebaseapp.com",
       databaseURL: "https://tic-tac-toe-9e69d-default-rtdb.firebaseio.com/",
@@ -251,30 +243,19 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // --- DOM Elements ---
     const boardEl = document.getElementById('board');
     const scoreEl = document.getElementById('score');
     const bgMusic = document.getElementById('bgMusic');
     const chatBoxEl = document.getElementById('chat-box');
-    const chatMessagesEl = document.getElementById('chat-messages');
-    const chatInputEl = document.getElementById('chat-input');
-    const chatSendBtn = document.getElementById('chat-send-btn');
     const difficultyGroupEl = document.getElementById('difficulty-group');
     
-    // --- Game State ---
     let currentPlayer = 'X';
     let board = Array(9).fill('');
-    let mode = 'pvp'; 
-    let currentDifficulty = 'easy'; 
+    let mode = 'pvp'; // 'pvp', 'ai', 'online'
+    let currentDifficulty = 'easy'; // 'easy', 'normal', 'hard'
     let score = { X: 0, O: 0 };
     
-    // --- Online State ---
-    let gameId = null; 
-    let mySymbol = null; 
-    let gameRef = null;
-    let chatRef = null;
-    
-    // --- Win Conditions ---
+    // --- Win Conditions
     const WINNING_COMBOS = [
       [0,1,2], [3,4,5], [6,7,8],
       [0,3,6], [1,4,7], [2,5,8],
@@ -290,13 +271,8 @@
         const div = document.createElement('div');
         div.className = 'cell';
         div.innerText = cell;
-        
-        // 🔑 Click Logic: Check turn and mode
-        const isOnlineAndMyTurn = mode === 'online' && mySymbol === currentPlayer;
-        const isLocalPlay = mode !== 'online' && !(mode === 'ai' && currentPlayer === 'O');
-        
-        const isClickable = !board[i] && (isLocalPlay || isOnlineAndMyTurn);
-        
+        // Disable clicks if it's AI's turn or not the player's turn in online mode
+        const isClickable = !board[i] && !(mode === 'ai' && currentPlayer === 'O');
         if (isClickable) {
           div.onclick = () => handleMove(i);
         } else {
@@ -307,13 +283,16 @@
     }
 
     function handleMove(index) {
-      if (board[index] || (mode === 'online' && mySymbol !== currentPlayer)) return;
+      if (board[index] || (mode === 'ai' && currentPlayer === 'O')) return;
 
       board[index] = currentPlayer;
+      updateBoard();
       
       const winnerCombo = checkWin();
       if (winnerCombo) {
+        // Apply win class to winning cells
         winnerCombo.forEach(i => document.querySelectorAll('.cell')[i].classList.add('win'));
+        
         score[currentPlayer]++;
         setTimeout(() => {
           alert(`${currentPlayer} wins!`);
@@ -330,45 +309,52 @@
           setTimeout(aiMove, 500);
         }
       }
-      updateBoard(); 
     }
 
     function checkWin(checkBoard = board) {
       for (const combo of WINNING_COMBOS) {
         const [a, b, c] = combo;
         if (checkBoard[a] && checkBoard[a] === checkBoard[b] && checkBoard[a] === checkBoard[c]) {
-          return combo; 
+          return combo; // Return the winning combination array
         }
       }
-      return null;
+      return null; // No win
     }
 
     function resetBoard() {
       board = Array(9).fill('');
       currentPlayer = 'X';
       drawBoard();
+      scoreEl.textContent = `X: ${score.X} | O: ${score.O}`;
       
+      // Update online state if needed
       if (mode === 'online') {
-        displayPlayerIdentity(); // Update score/turn display for online
-      } else {
-        scoreEl.textContent = `X: ${score.X} | O: ${score.O}`;
-      }
-      
-      // Only Player X (the initiator) should reset the online game state
-      if (mode === 'online' && mySymbol === 'X' && gameRef) { 
-        set(gameRef, { 
-          board: board, 
-          currentPlayer: 'X',
-          playerX: 'X',
-          playerO: (gameRef.playerO || null) 
-        });
+        const gameRef = ref(db, 'games/game1');
+        set(gameRef, { board: board, currentPlayer: 'X' });
       }
     }
 
 
     // --- 💻 AI Logic (Difficulty Levels) ---
 
+    function aiMove() {
+      let move = -1;
+      
+      if (currentDifficulty === 'hard') {
+        move = findBestMove(board, currentPlayer).index;
+      } else if (currentDifficulty === 'normal') {
+        move = normalAIMove(board, 'O');
+      } else { // 'easy'
+        move = easyAIMove(board);
+      }
+      
+      if (move !== -1) {
+        handleMove(move);
+      }
+    }
+    
     function easyAIMove(currentBoard) {
+      // **EASY**: Purely random move
       const empty = currentBoard.map((v, i) => v === '' ? i : null).filter(v => v !== null);
       return empty[Math.floor(Math.random() * empty.length)];
     }
@@ -402,12 +388,12 @@
       return easyAIMove(currentBoard);
     }
     
-    // Minimax Implementation for **HARD** difficulty
+    // Minimax Implementation for **HARD** difficulty (Unbeatable)
     function findBestMove(currentBoard, player) {
       const availableSpots = currentBoard.map((v, i) => v === '' ? i : null).filter(v => v !== null);
 
-      if (checkWin(currentBoard) && currentBoard[checkWin(currentBoard)[0]] === 'X') return { score: -10 };
-      if (checkWin(currentBoard) && currentBoard[checkWin(currentBoard)[0]] === 'O') return { score: 10 };
+      if (checkWin(currentBoard) && checkWin(currentBoard).length === 3 && currentBoard[checkWin(currentBoard)[0]] === 'X') return { score: -10 };
+      if (checkWin(currentBoard) && checkWin(currentBoard).length === 3 && currentBoard[checkWin(currentBoard)[0]] === 'O') return { score: 10 };
       if (availableSpots.length === 0) return { score: 0 };
       
       let bestMove = { index: -1, score: player === 'O' ? -Infinity : Infinity };
@@ -418,180 +404,68 @@
         
         const result = findBestMove(currentBoard, player === 'O' ? 'X' : 'O');
         
-        currentBoard[spot] = ''; 
+        currentBoard[spot] = ''; // Reset the spot
         
         if (player === 'O') {
           if (result.score > bestMove.score) {
             bestMove.score = result.score;
             bestMove.index = spot;
           }
-        } else {
+        } else { // Player 'X' (Opponent to 'O')
           if (result.score < bestMove.score) {
             bestMove.score = result.score;
             bestMove.index = spot;
           }
         }
       }
+      
       return bestMove;
     }
 
-    function aiMove() {
-      let move = -1;
-      
-      if (currentDifficulty === 'hard') {
-        move = findBestMove(board, 'O').index;
-      } else if (currentDifficulty === 'normal') {
-        move = normalAIMove(board, 'O');
-      } else { // 'easy'
-        move = easyAIMove(board);
-      }
-      
-      if (move !== -1) {
-        handleMove(move);
-      }
-    }
 
+    // --- 🌐 Mode/UI Control Functions ---
 
-    // --- 🌐 Online Mode Handlers ---
-
-    function setupOnlineGame() {
-      const params = new URLSearchParams(window.location.search);
-      let existingGameId = params.get('gameId');
-
-      if (existingGameId) {
-        // Player 2 joins an existing game
-        gameId = existingGameId;
-        gameRef = ref(db, `games/${gameId}`);
-        chatRef = ref(db, `chats/${gameId}`);
-        
-        onValue(gameRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data) {
-            board = data.board;
-            currentPlayer = data.currentPlayer;
-            // Assign Player O if slot is empty
-            if (!data.playerO) {
-                mySymbol = 'O';
-                // Update Firebase to mark O as joined
-                set(gameRef, { ...data, playerO: mySymbol });
-            } else if (data.playerX === 'X') {
-                 // Determine my role based on what's in Firebase
-                 mySymbol = existingGameId === data.playerO ? 'O' : 'X'; // Simplification: assuming I'm the one who joined
-                 if (data.playerO === 'O') mySymbol = 'O';
-            }
-            drawBoard();
-            displayPlayerIdentity();
-          } else {
-            alert("Game not found or expired. Starting a new game.");
-            startGame('pvp'); // Fallback to local
-          }
-        });
-      } else {
-        // Player 1 creates a new game
-        const newGameRef = push(ref(db, 'games'));
-        gameId = newGameRef.key;
-        gameRef = ref(db, `games/${gameId}`);
-        chatRef = ref(db, `chats/${gameId}`);
-        mySymbol = 'X';
-        
-        // Initialize game state on Firebase
-        set(gameRef, { 
-            board: board, 
-            currentPlayer: 'X', 
-            playerX: 'X',
-            playerO: null 
-        });
-        
-        // Update URL to share
-        window.history.pushState({}, '', `?gameId=${gameId}`);
-        alert(`New Game Created! Share this URL to invite a friend.\nGame ID: ${gameId}`);
-
-        // Listen for updates (for player O joining and opponent moves)
-        onValue(gameRef, (snapshot) => {
-          const data = snapshot.val();
-          if (data) {
-            board = data.board;
-            currentPlayer = data.currentPlayer;
-            drawBoard();
-            displayPlayerIdentity();
-          }
-        });
-      }
-      setupChatListener();
-    }
-    
-    // 💬 Chat Functions
-    function setupChatListener() {
-        if (!chatRef) return;
-
-        chatMessagesEl.innerHTML = ''; 
-        onValue(chatRef, (snapshot) => {
-            chatMessagesEl.innerHTML = ''; // Clear and redraw to handle async correctly
-            snapshot.forEach((childSnapshot) => {
-                const message = childSnapshot.val();
-                const div = document.createElement('div');
-                const isMine = message.sender === mySymbol;
-                
-                div.className = isMine ? 'chat-message-you' : 'chat-message-other';
-                div.innerText = `${message.sender}: ${message.text}`;
-                chatMessagesEl.appendChild(div);
-            });
-            chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
-        });
-        
-        chatSendBtn.onclick = sendMessage;
-        chatInputEl.onkeyup = (event) => {
-            if (event.key === 'Enter') sendMessage();
-        };
-    }
-    
-    function sendMessage() {
-        const text = chatInputEl.value.trim();
-        if (text && mySymbol && chatRef) {
-            push(chatRef, {
-                sender: mySymbol,
-                text: text,
-                timestamp: Date.now()
-            });
-            chatInputEl.value = '';
-        }
-    }
-    
-    function displayPlayerIdentity() {
-        scoreEl.textContent = `You are ${mySymbol || 'Spectator'} | Turn: ${currentPlayer} | X: ${score.X} | O: ${score.O}`;
-    }
-
-    // --- 🚀 Mode/UI Control Functions ---
-
-    window.startGame = function(selectedMode) {
+    function startGame(selectedMode) {
+      // Update UI buttons
       document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active-mode'));
       document.getElementById(`${selectedMode}Btn`).classList.add('active-mode');
 
       mode = selectedMode;
       
+      // Show/Hide difficulty and chat based on mode
       difficultyGroupEl.style.display = mode === 'ai' ? 'block' : 'none';
       chatBoxEl.style.display = mode === 'online' ? 'flex' : 'none';
-      
+
+      resetBoard();
+
       if (mode === 'online') {
-        setupOnlineGame();
-      } else {
-        // Reset online variables for local play
-        gameId = null;
-        mySymbol = null;
-        gameRef = null;
-        chatRef = null;
-        resetBoard();
+        // Simplified setup for one game room
+        const gameRef = ref(db, 'games/game1');
+        // Initialize or listen
+        set(gameRef, { board: board, currentPlayer: 'X' });
+
+        onValue(gameRef, snapshot => {
+          const data = snapshot.val();
+          if (data) {
+            board = data.board;
+            currentPlayer = data.currentPlayer;
+            drawBoard();
+          }
+        });
       }
     }
     
     window.setDifficulty = function(difficulty) {
       currentDifficulty = difficulty;
+      // Update UI buttons
       document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active-mode'));
+      // Find the button with the correct text and set it active
       document.querySelectorAll('.difficulty-btn').forEach(btn => {
         if (btn.innerText.toLowerCase() === difficulty) {
           btn.classList.add('active-mode');
         }
       });
+      // Restart game with new difficulty
       if (mode === 'ai') {
          resetBoard();
       }
@@ -599,20 +473,16 @@
 
     function updateBoard() {
       drawBoard();
-      if (mode === 'online' && gameRef && mySymbol === currentPlayer) { // Only update if it's my turn
-        set(gameRef, { 
-            board: board, 
-            currentPlayer, 
-            playerX: 'X',
-            playerO: 'O' 
-        });
+      if (mode === 'online') {
+        const gameRef = ref(db, 'games/game1');
+        set(gameRef, { board: board, currentPlayer });
       }
     }
 
     window.toggleMusic = function() {
       const muteBtn = document.getElementById('muteBtn');
       if (bgMusic.paused) {
-        bgMusic.play().catch(e => console.log("Autoplay blocked:", e));
+        bgMusic.play();
         muteBtn.innerText = 'Mute';
       } else {
         bgMusic.pause();
@@ -623,20 +493,11 @@
     // --- 🚀 Initialization ---
 
     window.onload = () => {
-      // Check for an existing game ID in the URL on load
-      const params = new URLSearchParams(window.location.search);
-      const urlGameId = params.get('gameId');
-
-      if (urlGameId) {
-          // If a game ID exists in URL, switch directly to online mode to join
-          startGame('online');
-      } else {
-          // Default start mode
-          startGame('pvp'); 
-      }
-      
-      // Attempt to play music on load (may be blocked by browser)
+      // Start in PvP mode by default
+      startGame('pvp'); 
+      // Initial background music play attempt
       bgMusic.play().catch(() => {
+        // Autoplay failed, set button text to reflect paused state
         document.getElementById('muteBtn').innerText = 'Play Music';
       });
     };
