@@ -3,504 +3,405 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tic-Tac-Toe Pro</title>
+  <title>Tic Tac Toe by Seb-Creations</title>
   <style>
-    /* 🎨 Design Customization for smooth, attractive colors and depth */
-    :root {
-      --primary-color: #2c3e50; /* Dark Blue/Charcoal */
-      --secondary-color: #3498db; /* Bright Blue */
-      --accent-color: #e74c3c; /* Red/Mute */
-      --win-color: #27ae60; /* Emerald Green */
-      --cell-bg: #ecf0f1; /* Light Gray/Silver */
+    body {
+      background: linear-gradient(135deg, #7f5af0, #2cb67d);
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      color: white;
+      text-align: center;
     }
 
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      /* Smooth radial gradient */
-      background: radial-gradient(circle at top left, var(--secondary-color) 0%, var(--primary-color) 100%);
-      text-align: center;
-      color: white;
-      margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-    }
     h1 {
-      margin-bottom: 15px;
-      letter-spacing: 2px;
-      font-weight: 300;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+      margin-top: 20px;
     }
-    #controls {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-    #board-area {
-      display: flex;
-      justify-content: center;
-      gap: 50px;
-      margin-top: 30px;
-    }
-    #board {
+
+    #game {
       display: grid;
       grid-template-columns: repeat(3, 100px);
-      gap: 7px; /* Slightly larger gap */
+      grid-gap: 10px;
       justify-content: center;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); /* Board shadow */
-      border-radius: 10px;
-      padding: 10px;
-      background: rgba(255, 255, 255, 0.1); /* Slight transparency */
+      margin: 20px auto;
     }
+
     .cell {
       width: 100px;
       height: 100px;
-      background: var(--cell-bg);
-      color: var(--primary-color);
-      font-size: 3em; /* Larger X/O */
-      font-weight: bold;
+      background: #16161a;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-size: 2.5rem;
+      color: #fffffe;
+      border-radius: 10px;
       cursor: pointer;
-      border-radius: 8px;
-      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     }
-    .cell:hover {
-      background: #bdc3c7;
-      transform: translateY(-2px);
-      box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+
+    .cell.winner {
+      background: #2cb67d;
     }
-    .cell.win {
-      background: var(--win-color);
-      color: white;
-      animation: win-pulse 0.5s infinite alternate;
+
+    #controls {
+      margin: 20px;
     }
-    @keyframes win-pulse {
-      from { transform: scale(1); box-shadow: 0 0 15px var(--win-color); }
-      to { transform: scale(1.05); box-shadow: 0 0 25px var(--win-color); }
-    }
-    .btn-group {
-      margin: 5px 0;
-    }
-    .btn {
+
+    button {
       padding: 10px 20px;
       margin: 5px;
-      font-size: 1em;
-      cursor: pointer;
       border: none;
-      border-radius: 25px; /* Pill shape */
-      background: var(--secondary-color);
-      color: white;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-      transition: background 0.3s, transform 0.1s;
-    }
-    .btn:hover {
-      background: #2980b9;
-      transform: translateY(-1px);
-    }
-    .btn:active {
-      transform: translateY(1px);
-    }
-    .btn.active-mode {
-      background: var(--win-color);
-    }
-    #score {
-      margin: 15px 0;
-      font-size: 1.2em;
+      background: #fffffe;
+      color: #0f0f0f;
       font-weight: bold;
-      letter-spacing: 1px;
+      border-radius: 5px;
+      cursor: pointer;
     }
+
+    #scoreboard {
+      margin-top: 20px;
+    }
+
     #muteBtn {
       position: absolute;
-      top: 20px;
-      right: 20px;
-      background: var(--accent-color);
-      box-shadow: none;
-      border-radius: 5px;
+      top: 10px;
+      right: 10px;
     }
-    #muteBtn:hover {
-      background: #c0392b;
-    }
+
     footer {
       margin-top: 40px;
-      font-size: 0.9em;
-      opacity: 0.7;
+      font-size: 0.9rem;
+      color: #94a1b2;
     }
-
-    /* 💬 Chat Box Styles (Placeholder) */
-    #chat-box {
-        width: 300px;
-        height: 450px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 10px;
-        padding: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        display: none; /* Hide by default, only for online mode */
+    
+    #onlineControls {
+        margin-top: 15px;
+        padding: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
     }
-    #chat-messages {
-        flex-grow: 1;
-        overflow-y: auto;
-        padding-right: 10px;
-        margin-bottom: 10px;
-        font-size: 0.9em;
-    }
-    #chat-input-container {
-        display: flex;
-        gap: 5px;
-    }
-    #chat-input {
-        flex-grow: 1;
-        padding: 8px;
-        border: none;
-        border-radius: 5px;
-        background: rgba(255, 255, 255, 0.9);
-        color: var(--primary-color);
-    }
-    #chat-send-btn {
-        padding: 8px 15px;
-        background: var(--win-color);
-        color: white;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-    }
-    .chat-message-you {
-      text-align: right;
-      color: #79df89;
-    }
-    .chat-message-other {
-      text-align: left;
-      color: white;
-    }
-
   </style>
 </head>
 <body>
-  <h1>Tic-Tac-Toe Pro</h1>
-  <div id="score">X: 0 | O: 0</div>
-
+  <h1>Tic Tac Toe</h1>
   <div id="controls">
-    <div class="btn-group">
-        <button class="btn active-mode" id="pvpBtn" onclick="startGame('pvp')">Play with Friend</button>
-        <button class="btn" id="aiBtn" onclick="startGame('ai')">Play vs AI</button>
-        <button class="btn" id="onlineBtn" onclick="startGame('online')">Online Multiplayer</button>
-    </div>
-
-    <div id="difficulty-group" class="btn-group" style="display: none;">
-        <span style="margin-right: 10px;">AI Difficulty:</span>
-        <button class="btn difficulty-btn active-mode" onclick="setDifficulty('easy')">Easy</button>
-        <button class="btn difficulty-btn" onclick="setDifficulty('normal')">Normal</button>
-        <button class="btn difficulty-btn" onclick="setDifficulty('hard')">Hard</button>
-    </div>
+    <button onclick="startGame('ai', 'easy')">Play AI (Easy)</button>
+    <button onclick="startGame('ai', 'normal')">Play AI (Normal)</button>
+    <button onclick="startGame('ai', 'hard')">Play AI (Hard)</button>
+    <button onclick="startGame('local')">Play with Friend (Same Device)</button>
+    <button onclick="handleOnlineStart()">Online Multiplayer</button>
+    <button id="muteBtn" onclick="toggleMute()">🔊</button>
   </div>
-
-  <button class="btn" id="muteBtn" onclick="toggleMusic()">Mute</button>
   
-  <div id="board-area">
-    <div id="board"></div>
-    
-    <div id="chat-box">
-      <div id="chat-messages">
-        <p class="chat-message-you">You: Hey, good luck!</p>
-        <p class="chat-message-other">Opponent: You too, let's play!</p>
-      </div>
-      <div id="chat-input-container">
-        <input type="text" id="chat-input" placeholder="Type a message..." />
-        <button id="chat-send-btn">Send</button>
-      </div>
-    </div>
+  <div id="onlineControls" style="display: none;">
+      <input type="text" id="roomIdInput" placeholder="Enter Room ID" style="padding: 8px; border-radius: 5px; border: none; margin-right: 5px; color: #0f0f0f;"/>
+      <button onclick="createGame()">Create Game (I am X)</button>
+      <button onclick="joinGame()">Join Game (I am O)</button>
+      <p id="gameStatus" style="font-weight: bold; margin-top: 10px;">Select a mode above.</p>
   </div>
 
-  <footer>Developed by Seb-Creations (Enhanced for difficulty and design)</footer>
+  <div id="game"></div>
 
-  <audio id="bgMusic" loop>
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-game-music-778.mp3" type="audio/mp3">
+  <div id="scoreboard">
+    <p>Player X: <span id="scoreX">0</span></p>
+    <p>Player O: <span id="scoreO">0</span></p>
+  </div>
+
+  <footer>Developed by Seb-Creations</footer>
+
+  <audio id="bgMusic" loop autoplay>
+    <source src="https://www.bensound.com/bensound-music/bensound-sunny.mp3" type="audio/mp3">
   </audio>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
 
-    // ** 🔐 Firebase Setup (Keep confidential keys safe in production!) **
+  <script>
+    // --- UPDATED FIREBASE CONFIGURATION ---
     const firebaseConfig = {
-      // NOTE: Using the provided API key structure.
       apiKey: "AIzaSyAFUoT40IjaiqH2791QvyNUP6SakHarupY",
       authDomain: "tic-tac-toe-9e69d.firebaseapp.com",
-      databaseURL: "https://tic-tac-toe-9e69d-default-rtdb.firebaseio.com/",
       projectId: "tic-tac-toe-9e69d",
       storageBucket: "tic-tac-toe-9e69d.appspot.com",
       messagingSenderId: "279666476240",
       appId: "1:279666476240:web:106c4481fbda677424cad5",
-      measurementId: "G-WQV8NJN397"
+      measurementId: "G-WQV8NJN397",
+      databaseURL: "https://tic-tac-toe-9e69d-default-rtdb.firebaseio.com"
     };
+    // -------------------------------------
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-    const boardEl = document.getElementById('board');
-    const scoreEl = document.getElementById('score');
-    const bgMusic = document.getElementById('bgMusic');
-    const chatBoxEl = document.getElementById('chat-box');
-    const difficultyGroupEl = document.getElementById('difficulty-group');
-    
-    let currentPlayer = 'X';
     let board = Array(9).fill('');
-    let mode = 'pvp'; // 'pvp', 'ai', 'online'
-    let currentDifficulty = 'easy'; // 'easy', 'normal', 'hard'
-    let score = { X: 0, O: 0 };
-    
-    // --- Win Conditions
-    const WINNING_COMBOS = [
-      [0,1,2], [3,4,5], [6,7,8],
-      [0,3,6], [1,4,7], [2,5,8],
-      [0,4,8], [2,4,6]
-    ];
+    let currentPlayer = 'X';
+    let isMuted = false;
+    let mode = 'local';
+    let gameActive = true;
+    let aiDifficulty = 'easy';
+    let localPlayer = null; // 'X' or 'O' for online play
+    let roomId = null;      // Current game room ID
 
+    const gameDiv = document.getElementById('game');
+    const scoreX = document.getElementById('scoreX');
+    const scoreO = document.getElementById('scoreO');
+    const bgMusic = document.getElementById('bgMusic');
+    const onlineControlsDiv = document.getElementById('onlineControls');
+    const roomIdInput = document.getElementById('roomIdInput');
+    const gameStatusP = document.getElementById('gameStatus');
 
-    // --- 🎮 Core Game Functions ---
-
-    function drawBoard() {
-      boardEl.innerHTML = '';
-      board.forEach((cell, i) => {
-        const div = document.createElement('div');
-        div.className = 'cell';
-        div.innerText = cell;
-        // Disable clicks if it's AI's turn or not the player's turn in online mode
-        const isClickable = !board[i] && !(mode === 'ai' && currentPlayer === 'O');
-        if (isClickable) {
-          div.onclick = () => handleMove(i);
-        } else {
-          div.style.cursor = 'default';
+    function renderBoard() {
+      gameDiv.innerHTML = '';
+      board.forEach((val, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = val;
+        // Add win class if present in local state
+        if (!gameActive && checkWinner().winningIndices && checkWinner().winningIndices.includes(i)) {
+             cell.classList.add('winner');
         }
-        boardEl.appendChild(div);
+        cell.onclick = () => handleClick(i);
+        gameDiv.appendChild(cell);
       });
-    }
-
-    function handleMove(index) {
-      if (board[index] || (mode === 'ai' && currentPlayer === 'O')) return;
-
-      board[index] = currentPlayer;
-      updateBoard();
       
-      const winnerCombo = checkWin();
-      if (winnerCombo) {
-        // Apply win class to winning cells
-        winnerCombo.forEach(i => document.querySelectorAll('.cell')[i].classList.add('win'));
-        
-        score[currentPlayer]++;
-        setTimeout(() => {
-          alert(`${currentPlayer} wins!`);
-          resetBoard();
-        }, 100);
-      } else if (board.every(cell => cell)) {
-        setTimeout(() => {
-          alert("Draw!");
-          resetBoard();
-        }, 100);
+      // Update status for online play
+      if (mode === 'online' && localPlayer) {
+          gameStatusP.textContent = gameActive 
+            ? `You are ${localPlayer}. It is ${currentPlayer}'s turn.`
+            : `Game Over! ${checkWinner().winner || 'Draw'} wins!`;
+      } else if (mode === 'online') {
+          gameStatusP.textContent = 'Waiting to create or join a game...';
+      }
+    }
+
+    function handleClick(index) {
+      if (!gameActive || board[index]) return;
+      
+      if (mode === 'online') {
+          // ONLINE: Only allow moves if it's the local player's turn
+          if (currentPlayer !== localPlayer) {
+              gameStatusP.textContent = `It is not your turn (${currentPlayer}'s turn).`;
+              return; 
+          }
+          handleOnlineMove(index);
       } else {
-        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-        if (mode === 'ai' && currentPlayer === 'O') {
-          setTimeout(aiMove, 500);
-        }
+          // LOCAL or AI: Proceed with local logic
+          board[index] = currentPlayer;
+          renderBoard();
+          checkWinner();
+          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+          if (mode === 'ai') aiMove();
       }
     }
 
-    function checkWin(checkBoard = board) {
-      for (const combo of WINNING_COMBOS) {
-        const [a, b, c] = combo;
-        if (checkBoard[a] && checkBoard[a] === checkBoard[b] && checkBoard[a] === checkBoard[c]) {
-          return combo; // Return the winning combination array
+    function checkWinner() {
+      const wins = [
+        [0,1,2], [3,4,5], [6,7,8], // Rows
+        [0,3,6], [1,4,7], [2,5,8], // Columns
+        [0,4,8], [2,4,6]           // Diagonals
+      ];
+      
+      let winner = null;
+      let winningIndices = null;
+
+      for (let [a,b,c] of wins) {
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          winner = board[a];
+          winningIndices = [a,b,c];
+          gameActive = false;
+          
+          // Only update score/visuals locally if not online
+          if (mode !== 'online') {
+             document.querySelectorAll('.cell')[a].classList.add('winner');
+             document.querySelectorAll('.cell')[b].classList.add('winner');
+             document.querySelectorAll('.cell')[c].classList.add('winner');
+             updateScore(winner);
+             setTimeout(resetGame, 2000);
+          }
+          return { winner, winningIndices };
         }
       }
-      return null; // No win
+
+      if (!board.includes('')) {
+        gameActive = false;
+        if (mode !== 'online') {
+           setTimeout(resetGame, 2000);
+        }
+        return { winner: 'Draw' };
+      }
+      
+      return {}; // No winner yet
+    }
+    
+    // Renders the win state after receiving the final board state from the opponent
+    function renderWinState(winner, winningIndices) {
+        if (winner && winningIndices) {
+            document.querySelectorAll('.cell')[winningIndices[0]].classList.add('winner');
+            document.querySelectorAll('.cell')[winningIndices[1]].classList.add('winner');
+            document.querySelectorAll('.cell')[winningIndices[2]].classList.add('winner');
+            updateScore(winner);
+        }
     }
 
-    function resetBoard() {
+    function updateScore(winner) {
+      if (winner === 'X') scoreX.textContent = +scoreX.textContent + 1;
+      else if (winner === 'O') scoreO.textContent = +scoreO.textContent + 1;
+    }
+
+    function resetGame() {
       board = Array(9).fill('');
       currentPlayer = 'X';
-      drawBoard();
-      scoreEl.textContent = `X: ${score.X} | O: ${score.O}`;
-      
-      // Update online state if needed
-      if (mode === 'online') {
-        const gameRef = ref(db, 'games/game1');
-        set(gameRef, { board: board, currentPlayer: 'X' });
-      }
+      gameActive = true;
+      renderBoard();
     }
 
+    function startGame(selectedMode, difficulty = 'easy') {
+      mode = selectedMode;
+      onlineControlsDiv.style.display = 'none';
+      localPlayer = null; // Clear local player on mode change
+      roomId = null;      // Clear room ID
+      // Stop listening to old Firebase game if active
+      db.ref('games/' + roomId).off(); 
+      resetGame();
+      if (mode === 'ai') aiDifficulty = difficulty;
+      gameStatusP.textContent = 'Game started locally or vs AI.';
+    }
+    
+    // --- Online Multiplayer Functions ---
+    
+    function handleOnlineStart() {
+        startGame('online');
+        onlineControlsDiv.style.display = 'block';
+        gameStatusP.textContent = 'Enter a room ID or generate one.';
+    }
 
-    // --- 💻 AI Logic (Difficulty Levels) ---
+    function generateRoomId() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+
+    // Function for Player X to create a new game
+    function createGame() {
+        roomId = roomIdInput.value.trim() || generateRoomId();
+        localPlayer = 'X';
+        
+        // Initialize the game state in Firebase
+        db.ref('games/' + roomId).set({
+            board: Array(9).fill(''),
+            currentPlayer: 'X',
+            gameActive: true,
+            playerX: true, // X is ready
+            playerO: false // Waiting for O
+        }).then(() => {
+            gameStatusP.textContent = `Game created! Your ID is: ${roomId}. Waiting for Player O...`;
+            roomIdInput.value = roomId;
+            syncGame();
+        }).catch(error => {
+            console.error("Firebase error:", error);
+            gameStatusP.textContent = "Error creating game. Check console.";
+        });
+    }
+
+    // Function for Player O to join an existing game
+    function joinGame() {
+        roomId = roomIdInput.value.trim();
+        if (!roomId) {
+            gameStatusP.textContent = "Please enter a Room ID.";
+            return;
+        }
+        
+        db.ref('games/' + roomId).once('value', snapshot => {
+            if (snapshot.exists() && !snapshot.val().playerO) {
+                localPlayer = 'O';
+                db.ref('games/' + roomId + '/playerO').set(true)
+                  .then(() => {
+                    gameStatusP.textContent = `Joined game ${roomId}! You are O. X goes first.`;
+                    syncGame();
+                  });
+            } else if (snapshot.exists() && snapshot.val().playerO) {
+                gameStatusP.textContent = "Room is full or doesn't exist.";
+            } else {
+                gameStatusP.textContent = "Room does not exist.";
+            }
+        });
+    }
+
+    // Listens for real-time changes in the Firebase game room
+    function syncGame() {
+        db.ref('games/' + roomId).on('value', snapshot => {
+            if (!snapshot.exists()) return;
+
+            const gameState = snapshot.val();
+            
+            // Update local state from Firebase
+            board = gameState.board;
+            currentPlayer = gameState.currentPlayer;
+            gameActive = gameState.gameActive;
+
+            renderBoard();
+
+            // Handle win/draw condition received from opponent
+            if (!gameActive) {
+                const result = checkWinner();
+                renderWinState(result.winner, result.winningIndices);
+                
+                // Offer to reset game after a delay
+                if (localPlayer === 'X') { // Only one player handles the reset
+                    setTimeout(() => {
+                       if (confirm("Game over. Start a new round?")) {
+                           db.ref('games/' + roomId).update({
+                               board: Array(9).fill(''),
+                               currentPlayer: 'X',
+                               gameActive: true
+                           });
+                       } else {
+                           db.ref('games/' + roomId).off(); // Stop listening
+                       }
+                    }, 3000);
+                }
+            }
+        });
+    }
+
+    // Updates the board in Firebase after a local move
+    function handleOnlineMove(index) {
+        board[index] = localPlayer;
+        
+        // 1. Check for local winner before updating Firebase
+        const result = checkWinner(); 
+        
+        const nextPlayer = localPlayer === 'X' ? 'O' : 'X';
+        
+        // 2. Update Firebase with the new state
+        db.ref('games/' + roomId).update({
+            board: board,
+            currentPlayer: result.winner ? localPlayer : nextPlayer, // Next player is only set if no winner
+            gameActive: result.winner || result.winner === 'Draw' ? false : true
+        });
+    }
+    
+    // --- AI Logic (Kept Random for simplicity) ---
 
     function aiMove() {
-      let move = -1;
+      if (!gameActive || currentPlayer !== 'O') return;
       
-      if (currentDifficulty === 'hard') {
-        move = findBestMove(board, currentPlayer).index;
-      } else if (currentDifficulty === 'normal') {
-        move = normalAIMove(board, 'O');
-      } else { // 'easy'
-        move = easyAIMove(board);
-      }
+      let empty = board.map((v, i) => v === '' ? i : null).filter(v => v !== null);
       
-      if (move !== -1) {
-        handleMove(move);
-      }
-    }
-    
-    function easyAIMove(currentBoard) {
-      // **EASY**: Purely random move
-      const empty = currentBoard.map((v, i) => v === '' ? i : null).filter(v => v !== null);
-      return empty[Math.floor(Math.random() * empty.length)];
-    }
-    
-    function normalAIMove(currentBoard, player) {
-      const opponent = player === 'X' ? 'O' : 'X';
-      const empty = currentBoard.map((v, i) => v === '' ? i : null).filter(v => v !== null);
-      
-      // 1. Check for a winning move for 'O'
-      for (const i of empty) {
-        let tempBoard = [...currentBoard];
-        tempBoard[i] = player;
-        if (checkWin(tempBoard)) return i;
-      }
-      
-      // 2. Check for an immediate losing move (block 'X')
-      for (const i of empty) {
-        let tempBoard = [...currentBoard];
-        tempBoard[i] = opponent;
-        if (checkWin(tempBoard)) return i;
-      }
-      
-      // 3. Take the center (if available)
-      if (currentBoard[4] === '') return 4;
-      
-      // 4. Take a random corner
-      const corners = [0, 2, 6, 8].filter(i => currentBoard[i] === '');
-      if (corners.length > 0) return corners[Math.floor(Math.random() * corners.length)];
-      
-      // 5. Fallback: Random move
-      return easyAIMove(currentBoard);
-    }
-    
-    // Minimax Implementation for **HARD** difficulty (Unbeatable)
-    function findBestMove(currentBoard, player) {
-      const availableSpots = currentBoard.map((v, i) => v === '' ? i : null).filter(v => v !== null);
-
-      if (checkWin(currentBoard) && checkWin(currentBoard).length === 3 && currentBoard[checkWin(currentBoard)[0]] === 'X') return { score: -10 };
-      if (checkWin(currentBoard) && checkWin(currentBoard).length === 3 && currentBoard[checkWin(currentBoard)[0]] === 'O') return { score: 10 };
-      if (availableSpots.length === 0) return { score: 0 };
-      
-      let bestMove = { index: -1, score: player === 'O' ? -Infinity : Infinity };
-      
-      for (let i = 0; i < availableSpots.length; i++) {
-        const spot = availableSpots[i];
-        currentBoard[spot] = player;
-        
-        const result = findBestMove(currentBoard, player === 'O' ? 'X' : 'O');
-        
-        currentBoard[spot] = ''; // Reset the spot
-        
-        if (player === 'O') {
-          if (result.score > bestMove.score) {
-            bestMove.score = result.score;
-            bestMove.index = spot;
-          }
-        } else { // Player 'X' (Opponent to 'O')
-          if (result.score < bestMove.score) {
-            bestMove.score = result.score;
-            bestMove.index = spot;
-          }
-        }
-      }
-      
-      return bestMove;
-    }
-
-
-    // --- 🌐 Mode/UI Control Functions ---
-
-    function startGame(selectedMode) {
-      // Update UI buttons
-      document.querySelectorAll('.btn-group .btn').forEach(btn => btn.classList.remove('active-mode'));
-      document.getElementById(`${selectedMode}Btn`).classList.add('active-mode');
-
-      mode = selectedMode;
-      
-      // Show/Hide difficulty and chat based on mode
-      difficultyGroupEl.style.display = mode === 'ai' ? 'block' : 'none';
-      chatBoxEl.style.display = mode === 'online' ? 'flex' : 'none';
-
-      resetBoard();
-
-      if (mode === 'online') {
-        // Simplified setup for one game room
-        const gameRef = ref(db, 'games/game1');
-        // Initialize or listen
-        set(gameRef, { board: board, currentPlayer: 'X' });
-
-        onValue(gameRef, snapshot => {
-          const data = snapshot.val();
-          if (data) {
-            board = data.board;
-            currentPlayer = data.currentPlayer;
-            drawBoard();
-          }
-        });
-      }
-    }
-    
-    window.setDifficulty = function(difficulty) {
-      currentDifficulty = difficulty;
-      // Update UI buttons
-      document.querySelectorAll('.difficulty-btn').forEach(btn => btn.classList.remove('active-mode'));
-      // Find the button with the correct text and set it active
-      document.querySelectorAll('.difficulty-btn').forEach(btn => {
-        if (btn.innerText.toLowerCase() === difficulty) {
-          btn.classList.add('active-mode');
-        }
-      });
-      // Restart game with new difficulty
-      if (mode === 'ai') {
-         resetBoard();
+      if (empty.length > 0) {
+        let move = empty[Math.floor(Math.random() * empty.length)];
+        board[move] = 'O';
+        renderBoard();
+        checkWinner();
+        currentPlayer = 'X';
       }
     }
 
-    function updateBoard() {
-      drawBoard();
-      if (mode === 'online') {
-        const gameRef = ref(db, 'games/game1');
-        set(gameRef, { board: board, currentPlayer });
-      }
+    function toggleMute() {
+      isMuted = !isMuted;
+      bgMusic.muted = isMuted;
+      document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊';
     }
 
-    window.toggleMusic = function() {
-      const muteBtn = document.getElementById('muteBtn');
-      if (bgMusic.paused) {
-        bgMusic.play();
-        muteBtn.innerText = 'Mute';
-      } else {
-        bgMusic.pause();
-        muteBtn.innerText = 'Play Music';
-      }
-    }
-
-    // --- 🚀 Initialization ---
-
-    window.onload = () => {
-      // Start in PvP mode by default
-      startGame('pvp'); 
-      // Initial background music play attempt
-      bgMusic.play().catch(() => {
-        // Autoplay failed, set button text to reflect paused state
-        document.getElementById('muteBtn').innerText = 'Play Music';
-      });
-    };
+    renderBoard();
   </script>
 </body>
 </html>
