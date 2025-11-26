@@ -447,7 +447,20 @@
                 resetGame();
                 gameStatusP.textContent = `Ready to play ${size}x${size} in ${mode} mode.`;
             } else {
-                gameStatusP.textContent = `Please create or join an online game with size ${size}x${size}.`;
+                // *** ONLINE FIX: If the board size is changed while connected, 
+                // send the new size to the opponent and reset the board for a new game.
+                if (roomId && localPlayer) {
+                    gameStatusP.textContent = `New board size ${size}x${size} selected. Starting new round...`;
+                    db.ref('games/' + roomId).update({
+                        boardSize: size,
+                        board: Array(size * size).fill(''),
+                        currentPlayer: 'X', 
+                        gameActive: true,
+                        lastMoveTime: firebase.database.ServerValue.TIMESTAMP
+                    });
+                } else {
+                    gameStatusP.textContent = `Please create or join an online game with size ${size}x${size}.`;
+                }
             }
         }
         
@@ -475,7 +488,7 @@
             if (mode === 'online' && localPlayer) { 
                 if (!gameActive) { 
                     const result = checkWinner(board, false);
-                    gameStatusP.textContent = `Game Over! ${result.winner === 'Draw' ? 'It\'s a Draw!' : `${result.winner} wins!`}`; 
+                    gameStatusP.textContent = `Game Over! ${result.winner === 'Draw' ? 'It\'s a Draw!' : `${result.winner} wins!`}. Starting new round in 3 seconds...`; 
                     stopTimer(); 
                 } else { 
                     const turnMessage = (currentPlayer === localPlayer) ? 'Your turn!' : `${currentPlayer}'s turn.`;
@@ -703,7 +716,7 @@
             drawBoard();
         } 
 
-        // --- Online Multiplayer Functions (No changes needed) --- 
+        // --- Online Multiplayer Functions (RESET/BOARD SIZE CHANGES) --- 
         function sendChatMessage() {
             if (!db || !roomId || !localPlayer) return;
 
@@ -748,10 +761,11 @@
             if (!db) return;
             roomId = roomIdInput.value.trim() || generateRoomId(); 
             localPlayer = 'X'; 
-            const newBoardLength = boardSize * boardSize;
+            // Set the local board size first
+            setBoardSize(boardSize, document.querySelector(`#boardSizeControls button[id="size${boardSize}x${boardSize}Btn"]`) || null);
 
             db.ref('games/' + roomId).set({ 
-                board: Array(newBoardLength).fill(''), 
+                board: Array(boardSize * boardSize).fill(''), // Use current boardSize
                 boardSize: boardSize, 
                 currentPlayer: 'X', 
                 gameActive: true, 
@@ -778,8 +792,12 @@
                 const gameState = snapshot.val(); 
                 if (snapshot.exists() && !gameState.playerO) { 
                     localPlayer = 'O'; 
+                    // Sync the board size from Firebase state on join
                     if (gameState.boardSize !== boardSize) {
                         setBoardSize(gameState.boardSize, document.getElementById('size' + gameState.boardSize + 'x' + gameState.boardSize + 'Btn') || null);
+                    } else {
+                        // If size matches, still ensure local state is clean
+                        setBoardSize(boardSize, document.querySelector(`#boardSizeControls button[id="size${boardSize}x${boardSize}Btn"]`) || null);
                     }
                     
                     db.ref('games/' + roomId + '/playerO').set(true) 
@@ -802,10 +820,12 @@
                 if (!snapshot.exists()) return; 
                 const gameState = snapshot.val(); 
                 
+                // IMPORTANT: Sync board size if it changes in Firebase (e.g., if Player X changed it)
                 if (gameState.boardSize && gameState.boardSize !== boardSize) {
                     setBoardSize(gameState.boardSize, document.getElementById('size' + gameState.boardSize + 'x' + gameState.boardSize + 'Btn') || null);
                 }
 
+                const prevGameActive = gameActive;
                 board = gameState.board; 
                 currentPlayer = gameState.currentPlayer; 
                 gameActive = gameState.gameActive; 
@@ -822,35 +842,35 @@
                 } 
                 drawBoard(); 
                 
-                if (!gameActive) { 
+                // *** FIX: Automatic Reset Logic ***
+                if (prevGameActive && !gameActive) { 
+                    // Game just ended, update scores and reset automatically
                     stopTimer(); 
                     const result = checkWinner(board, false); 
-                    if (localPlayer === 'X' || localPlayer === 'O') { 
-                        if (localPlayer === 'X') {
-                            setTimeout(() => { 
-                                if (confirm(`Game over. ${result.winner === 'Draw' ? 'It was a Draw.' : `${result.winner} wins!`}\n\nStart a new round?`)) { 
-                                    let newScores = gameState.scores || { scoreX: 0, scoreO: 0, draws: 0 }; 
-                                    if (result.winner === 'X') newScores.scoreX++; 
-                                    else if (result.winner === 'O') newScores.scoreO++; 
-                                    else if (result.winner === 'Draw') newScores.draws++; 
-                                    
-                                    const newBoardLength = boardSize * boardSize;
-                                    db.ref('games/' + roomId).update({ 
-                                        board: Array(newBoardLength).fill(''), 
-                                        currentPlayer: 'X', 
-                                        gameActive: true, 
-                                        scores: newScores,
-                                        lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
-                                    }); 
-                                } else { 
-                                    db.ref('games/' + roomId).off(); 
-                                    gameStatusP.textContent = `Game disconnected. Scores: X-${gameState.scores.scoreX}, O-${gameState.scores.scoreO}, Draws-${gameState.scores.draws}`; 
-                                } 
-                            }, 3000); 
-                        } else {
-                            gameStatusP.textContent = `Game Over! ${result.winner === 'Draw' ? 'It\'s a Draw!' : `${result.winner} wins!`}. Waiting for X to start a new round...`;
-                        }
-                    } 
+                    
+                    // Only the player who made the last move (or X if host) handles the Firebase reset
+                    if (localPlayer === 'X' || localPlayer === 'O') {
+                        // Wait a few seconds to let players see the win marker
+                        setTimeout(() => { 
+                            // Recalculate scores for the reset
+                            let newScores = gameState.scores || { scoreX: 0, scoreO: 0, draws: 0 }; 
+                            if (result.winner === 'X') newScores.scoreX++; 
+                            else if (result.winner === 'O') newScores.scoreO++; 
+                            else if (result.winner === 'Draw') newScores.draws++; 
+                            
+                            const newBoardLength = boardSize * boardSize;
+
+                            db.ref('games/' + roomId).update({ 
+                                board: Array(newBoardLength).fill(''), 
+                                currentPlayer: 'X', 
+                                gameActive: true, 
+                                scores: newScores,
+                                boardSize: boardSize, // Re-confirm the current board size
+                                lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
+                            });
+                            // No need for a confirmation dialog, just reset
+                        }, 3000); 
+                    }
                 } 
             }); 
         } 
