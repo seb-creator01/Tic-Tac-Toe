@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* --- CSS STYLES (Provided by user) --- */
+        /* --- Existing CSS STYLES (Provided by user) --- */
         body { 
             background: linear-gradient(135deg, #7f5af0, #2cb67d); 
             font-family: 'Segoe UI', sans-serif; 
@@ -101,6 +101,56 @@
             border-radius: 8px; 
             display: none; /* Hide by default */
         } 
+        /* --- NEW CSS for Chat and Timer --- */
+        #game-info {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+        #chat-container {
+            width: 300px;
+            margin-left: 20px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            text-align: left;
+            display: none; /* Only show in online mode */
+        }
+        #chat-messages {
+            height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        #chat-input-area {
+            display: flex;
+        }
+        #chat-input-area input {
+            flex-grow: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px 0 0 4px;
+        }
+        #chat-input-area button {
+            padding: 8px 15px;
+            background: #2cb67d;
+            color: white;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        #timer {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #f05a7f; /* Reddish color for urgency */
+            margin-bottom: 10px;
+            display: none; /* Hidden by default */
+        }
+        .chat-message-x { color: #7f5af0; } /* Player X color */
+        .chat-message-o { color: #2cb67d; } /* Player O color */
     </style>
 </head>
 <body>
@@ -124,9 +174,25 @@
         <button onclick="joinGame()">Join Game (I am O)</button>
     </div>
 
-    <div id="game-container">
-        <div id="game">
+    <div id="game-info">
+        <div>
+            <p id="timer" style="display: none;">Turn Time: 0s</p>
+            
+            <div id="game-container">
+                <div id="game">
+                </div>
             </div>
+        </div>
+        
+        <div id="chat-container">
+            <h3>Chat</h3>
+            <div id="chat-messages">
+                </div>
+            <div id="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type a message..." maxlength="100">
+                <button onclick="sendChatMessage()">Send</button>
+            </div>
+        </div>
     </div>
     
     <div id="scoreboard">
@@ -182,6 +248,11 @@
         let aiDifficulty = 'easy'; 
         let localPlayer = null; 
         let roomId = null; 
+
+        // --- NEW Timer/Chat State Variables ---
+        let timerInterval = null; 
+        let localMoveStartTime = Date.now();
+        // ------------------------------------
         
         // DOM Elements 
         const gameDiv = document.getElementById('game'); 
@@ -198,7 +269,50 @@
         const onlineScoreLocal = document.getElementById('onlineScoreLocal'); 
         const onlineScoreOpponent = document.getElementById('onlineScoreOpponent'); 
         const onlineScoreDraws = document.getElementById('onlineScoreDraws'); 
+        const chatContainer = document.getElementById('chat-container'); // NEW
+        const chatMessages = document.getElementById('chat-messages'); // NEW
+        const chatInput = document.getElementById('chatInput'); // NEW
+        const timerDisplay = document.getElementById('timer'); // NEW
 
+        // --- NEW Timer Functions ---
+
+        /**
+         * Starts the turn timer, only showing it if time elapsed > 10s.
+         * @param {number} startTime - The timestamp (ms) of the last move.
+         */
+        function startTimer(startTime) {
+            stopTimer(); // Clear any existing timer
+
+            timerInterval = setInterval(() => {
+                const elapsedMs = Date.now() - startTime;
+                const elapsedSec = Math.floor(elapsedMs / 1000);
+
+                if (elapsedSec >= 10) {
+                    timerDisplay.style.display = 'block';
+                    timerDisplay.textContent = `Turn Time: ${elapsedSec}s`;
+                } else {
+                    timerDisplay.style.display = 'none';
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            timerDisplay.style.display = 'none';
+            timerDisplay.textContent = 'Turn Time: 0s';
+        }
+
+        function resetLocalTimer() {
+            localMoveStartTime = Date.now();
+            if (mode === 'local' || mode === 'ai') {
+                stopTimer();
+                startTimer(localMoveStartTime);
+            }
+        }
+        
         // --- Game Logic Functions ---
 
         /** * Renders the current state of the board array to the DOM. 
@@ -224,12 +338,19 @@
                 const result = checkWinner(board); 
                 if (!gameActive) { 
                     gameStatusP.textContent = `Game Over! ${result.winner === 'Draw' ? 'It\'s a Draw!' : `${result.winner} wins!`}`; 
+                    stopTimer(); // Stop timer when game ends
                 } else { 
                     gameStatusP.textContent = `You are ${localPlayer}. It is ${currentPlayer}'s turn.`; 
                 } 
             } else if (mode === 'online') { 
                 gameStatusP.textContent = 'Waiting to create or join a game...'; 
             } 
+            
+            // Trigger AI move in AI mode, but only after player's move
+            if (mode === 'ai' && currentPlayer === 'O' && gameActive) {
+                // Short delay for visual effect
+                setTimeout(aiMove, 500); 
+            }
         } 
 
         function handleClick(index) { 
@@ -246,7 +367,7 @@
                 drawBoard(); 
                 checkWinner(board); 
                 currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; 
-                if (mode === 'ai') aiMove(); 
+                resetLocalTimer(); // Reset timer on local/AI move
             } 
         } 
 
@@ -312,6 +433,7 @@
             currentPlayer = 'X'; 
             gameActive = true; 
             drawBoard(); 
+            resetLocalTimer(); // Start timer on reset for local/AI
         } 
         
         function setActiveButton(activeButton) { 
@@ -329,11 +451,12 @@
             onlineControlsDiv.style.display = 'none'; 
             onlineScoreboardDiv.style.display = 'none'; 
             localScoreboardDiv.style.display = 'inline-block'; 
+            chatContainer.style.display = 'none'; // Hide chat
             localPlayer = null; 
-            roomId = null; 
             
             // Clear previous Firebase listener 
             if (db && roomId) db.ref('games/' + roomId).off(); 
+            roomId = null; // Clear room ID
             
             // Reset local scores when starting a new non-online game type 
             scoreX.textContent = '0'; 
@@ -355,10 +478,49 @@
             onlineControlsDiv.style.display = 'block'; 
             onlineScoreboardDiv.style.display = 'inline-block'; 
             localScoreboardDiv.style.display = 'none'; 
+            chatContainer.style.display = 'block'; // Show chat
+            stopTimer(); // Stop local timer
             gameStatusP.textContent = 'Enter a room ID or generate one.'; 
         } 
 
         // --- Online Multiplayer Functions --- 
+
+        // NEW: Handles online chat
+        function sendChatMessage() {
+            if (!db || !roomId || !localPlayer) return;
+
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            const chatRef = db.ref('games/' + roomId + '/chat');
+            chatRef.push({
+                sender: localPlayer,
+                message: message,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
+            });
+
+            chatInput.value = '';
+        }
+
+        // NEW: Syncs chat messages
+        function syncChat() {
+            if (!db || !roomId) return;
+
+            db.ref('games/' + roomId + '/chat').on('child_added', snapshot => {
+                const messageData = snapshot.val();
+                const sender = messageData.sender;
+                const message = messageData.message;
+
+                const msgElement = document.createElement('p');
+                msgElement.textContent = `[${sender}]: ${message}`;
+                msgElement.className = sender === 'X' ? 'chat-message-x' : 'chat-message-o';
+                chatMessages.appendChild(msgElement);
+                
+                // Auto-scroll to the bottom
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            });
+        }
+
         function generateRoomId() { 
             return Math.random().toString(36).substring(2, 8).toUpperCase(); 
         } 
@@ -373,11 +535,13 @@
                 gameActive: true, 
                 playerX: true, 
                 playerO: false, 
-                scores: { scoreX: 0, scoreO: 0, draws: 0 } 
+                scores: { scoreX: 0, scoreO: 0, draws: 0 },
+                lastMoveTime: firebase.database.ServerValue.TIMESTAMP // NEW: Initial timestamp
             }).then(() => { 
                 gameStatusP.textContent = `Game created! Your ID is: ${roomId}. Waiting for Player O...`; 
                 roomIdInput.value = roomId; 
                 syncGame(); 
+                syncChat(); // NEW: Start chat sync
             }); 
         } 
         
@@ -395,7 +559,8 @@
                     db.ref('games/' + roomId + '/playerO').set(true) 
                     .then(() => { 
                         gameStatusP.textContent = `Joined game ${roomId}! You are O. X goes first.`; 
-                        syncGame(); 
+                        syncGame();
+                        syncChat(); // NEW: Start chat sync
                     }); 
                 } else if (snapshot.exists() && gameState.playerO) { 
                     gameStatusP.textContent = "Room is full."; 
@@ -413,30 +578,44 @@
                 board = gameState.board; 
                 currentPlayer = gameState.currentPlayer; 
                 gameActive = gameState.gameActive; 
+                
+                // NEW: Handle online timer
+                if (gameState.lastMoveTime) {
+                    startTimer(gameState.lastMoveTime);
+                }
+
                 if (gameState.scores) { 
                     updateOnlineScoreboard(gameState.scores); 
                 } 
                 drawBoard(); 
                 if (!gameActive) { 
+                    stopTimer(); // Stop timer when game ends
                     const result = checkWinner(board); 
-                    if (localPlayer === 'X') { 
-                        setTimeout(() => { 
-                            if (confirm(`Game over. ${result.winner === 'Draw' ? 'It was a Draw.' : `${result.winner} wins!`}\n\nStart a new round?`)) { 
-                                let newScores = gameState.scores || { scoreX: 0, scoreO: 0, draws: 0 }; 
-                                if (result.winner === 'X') newScores.scoreX++; 
-                                else if (result.winner === 'O') newScores.scoreO++; 
-                                else if (result.winner === 'Draw') newScores.draws++; 
-                                db.ref('games/' + roomId).update({ 
-                                    board: Array(9).fill(''), 
-                                    currentPlayer: 'X', 
-                                    gameActive: true, 
-                                    scores: newScores 
-                                }); 
-                            } else { 
-                                db.ref('games/' + roomId).off(); 
-                                gameStatusP.textContent = `Game disconnected. Scores: X-${gameState.scores.scoreX}, O-${gameState.scores.scoreO}, Draws-${gameState.scores.draws}`; 
-                            } 
-                        }, 3000); 
+                    if (localPlayer === 'X' || localPlayer === 'O') { 
+                        // Only prompt one player (X will be designated to handle the reset in this design)
+                        if (localPlayer === 'X') {
+                            setTimeout(() => { 
+                                if (confirm(`Game over. ${result.winner === 'Draw' ? 'It was a Draw.' : `${result.winner} wins!`}\n\nStart a new round?`)) { 
+                                    let newScores = gameState.scores || { scoreX: 0, scoreO: 0, draws: 0 }; 
+                                    if (result.winner === 'X') newScores.scoreX++; 
+                                    else if (result.winner === 'O') newScores.scoreO++; 
+                                    else if (result.winner === 'Draw') newScores.draws++; 
+                                    db.ref('games/' + roomId).update({ 
+                                        board: Array(9).fill(''), 
+                                        currentPlayer: 'X', 
+                                        gameActive: true, 
+                                        scores: newScores,
+                                        lastMoveTime: firebase.database.ServerValue.TIMESTAMP // Reset timer for new round
+                                    }); 
+                                } else { 
+                                    db.ref('games/' + roomId).off(); 
+                                    gameStatusP.textContent = `Game disconnected. Scores: X-${gameState.scores.scoreX}, O-${gameState.scores.scoreO}, Draws-${gameState.scores.draws}`; 
+                                } 
+                            }, 3000); 
+                        } else {
+                            // Player O just waits for X to decide the new round
+                            gameStatusP.textContent = `Game Over! ${result.winner === 'Draw' ? 'It\'s a Draw!' : `${result.winner} wins!`}. Waiting for X to start a new round...`;
+                        }
                     } 
                 } 
             }); 
@@ -450,7 +629,8 @@
             db.ref('games/' + roomId).update({ 
                 board: board, 
                 currentPlayer: result.winner || result.winner === 'Draw' ? localPlayer : nextPlayer, 
-                gameActive: result.winner || result.winner === 'Draw' ? false : true 
+                gameActive: result.winner || result.winner === 'Draw' ? false : true,
+                lastMoveTime: firebase.database.ServerValue.TIMESTAMP // NEW: Update timestamp on move
             }); 
         } 
 
@@ -562,6 +742,7 @@
                 drawBoard(); 
                 checkWinner(board); 
                 currentPlayer = 'X'; 
+                resetLocalTimer(); // Reset timer after AI move
             } 
         } 
 
@@ -571,8 +752,10 @@
             document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊'; 
         } 
 
+        // Initial setup
         drawBoard();
+        resetLocalTimer(); // Start the timer check from the beginning for default local mode.
+        
     </script>
 </body>
 </html>
-
