@@ -457,7 +457,7 @@
             } else {
                 // *** ONLINE FIX: If the board size is changed while connected, 
                 // update Firebase to force a new game on the new size
-                if (roomId && localPlayer) {
+                if (roomId && localPlayer && button) { // Only update Firebase if a button was actually clicked (not from resize event)
                     gameStatusP.textContent = `New board size ${size}x${size} selected. Starting new round...`;
                     db.ref('games/' + roomId).update({
                         boardSize: size,
@@ -466,7 +466,7 @@
                         gameActive: true,
                         lastMoveTime: firebase.database.ServerValue.TIMESTAMP
                     });
-                } else {
+                } else if (!roomId || !localPlayer) {
                     gameStatusP.textContent = `Please create or join an online game with size ${size}x${size}.`;
                 }
             }
@@ -834,7 +834,8 @@
                 
                 // IMPORTANT: Sync board size if it changes in Firebase 
                 if (gameState.boardSize && gameState.boardSize !== boardSize) {
-                    setBoardSize(gameState.boardSize, document.getElementById('size' + gameState.boardSize + 'x' + gameState.boardSize + 'Btn') || null);
+                    // Call setBoardSize with null to only update state/visuals, not trigger Firebase update
+                    setBoardSize(gameState.boardSize, null); 
                 }
 
                 const prevGameActive = gameActive;
@@ -855,14 +856,11 @@
                 
                 // *** FIX: Automatic Reset Trigger ***
                 if (prevGameActive && !gameActive) { 
-                    // Game just ended. Set a timeout for the winning player to reset the board.
                     
                     if (autoResetTimeout) clearTimeout(autoResetTimeout);
 
                     autoResetTimeout = setTimeout(() => { 
-                        // Only the player who is currently synchronized should handle the reset state 
-                        // (prevents race conditions if both try to update scores/reset at the same time)
-                        // Player X (host) is the best candidate for this clean-up.
+                        // Only the host (Player X) handles the definitive reset state 
                         if (localPlayer === 'X') {
                             
                             // Re-read scores/state before writing back to avoid stale data
@@ -888,13 +886,11 @@
         function handleOnlineMove(index) { 
             if (!db) return;
             
-            // Temporary board state for checkWinner before writing to Firebase
             const tempBoard = board.slice();
             tempBoard[index] = localPlayer; 
             const result = checkWinner(tempBoard, false); 
             const nextPlayer = localPlayer === 'X' ? 'O' : 'X'; 
             
-            // Get current scores safely before updating
             db.ref('games/' + roomId).once('value', snapshot => {
                 if (!snapshot.exists()) return;
                 const gameState = snapshot.val();
@@ -907,10 +903,10 @@
                     lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
                 };
 
-                // *** FIX: Update scores and set gameActive: false immediately on the winning move ***
+                // Update scores and set gameActive: false immediately on the winning move
                 if (result.winner || result.winner === 'Draw') {
                     updateData.gameActive = false;
-                    updateData.currentPlayer = localPlayer; // Keep winner as current player for status sync
+                    updateData.currentPlayer = localPlayer; 
                     
                     if (result.winner === 'X') newScores.scoreX++; 
                     else if (result.winner === 'O') newScores.scoreO++; 
@@ -918,7 +914,6 @@
                     updateData.scores = newScores;
                 }
                 
-                // Write all updates to Firebase at once
                 db.ref('games/' + roomId).update(updateData); 
             });
             stopTimer(); 
@@ -934,9 +929,6 @@
             return currentBoard.map((v, i) => v === '' ? i : null).filter(v => v !== null);
         }
         
-        /**
-         * The Minimax algorithm that recursively evaluates the board state (3x3 only).
-         */
         function minimax(currentBoard, player) {
             const result = checkWinner(currentBoard, false); 
             
@@ -947,7 +939,6 @@
             let availableSpots = getEmptyIndices(currentBoard);
         
             if (player === 'O') {
-                // AI (Maximizer)
                 let bestScore = -Infinity;
                 for (let i of availableSpots) {
                     let nextBoard = currentBoard.slice(); 
@@ -958,7 +949,6 @@
                 }
                 return bestScore;
             } else {
-                // Human (Minimizer)
                 let bestScore = Infinity;
                 for (let i of availableSpots) {
                     let nextBoard = currentBoard.slice(); 
@@ -1041,15 +1031,18 @@
             const localBtn = document.querySelector('#controls button:nth-child(1)');
             startGame('local', null, localBtn);
 
-            // Re-run setBoardSize on window resize to maintain responsiveness
+            // --- FIX: Prevent restart on scroll/mobile viewport change using Debouncing ---
+            let resizeTimer;
             window.addEventListener('resize', () => {
-                if (mode !== 'online' || !roomId) {
-                    setBoardSize(boardSize, document.querySelector(`#boardSizeControls button[id="size${boardSize}x${boardSize}Btn"]`) || null);
-                } else {
-                    // When online, update visuals without writing to Firebase
+                clearTimeout(resizeTimer); 
+
+                resizeTimer = setTimeout(() => {
+                    // Call setBoardSize with null button to avoid triggering Firebase updates,
+                    // but allow the CSS/sizing recalculation for responsiveness.
                     setBoardSize(boardSize, null);
-                }
+                }, 250); // Debounce time: 250ms
             });
+            // -----------------------------------------------------------------------------
         });
         
     </script>
