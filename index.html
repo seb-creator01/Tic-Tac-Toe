@@ -100,10 +100,10 @@
             color: var(--color-secondary-accent);
             text-shadow: 0 0 5px rgba(57, 255, 20, 0.8);
             margin-top: 20px;
-            margin-bottom: 30px; /* Added margin below tagline */
+            margin-bottom: 30px; 
         }
         
-        /* New: Play Button Style */
+        /* Play Button Style */
         #play-button {
             background: var(--color-primary-accent); /* Electric Blue */
             color: var(--color-dark-bg);
@@ -114,13 +114,13 @@
             transition: transform 0.1s, opacity 0.3s;
         }
         #play-button:hover {
-            background: #4de6ff; /* Lighter blue on hover */
+            background: #4de6ff; 
         }
         #play-button:active {
             transform: scale(0.95);
         }
 
-        /* New: Loading Spinner Style */
+        /* Loading Spinner Style */
         #loading-spinner {
             border: 8px solid var(--color-panel-bg); 
             border-top: 8px solid var(--color-secondary-accent); /* Neon Green spinner */
@@ -128,7 +128,7 @@
             width: 60px;
             height: 60px;
             animation: spin 1.5s linear infinite;
-            display: none; /* Hidden by default */
+            display: none; 
             margin-top: 30px;
         }
 
@@ -137,7 +137,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- BUTTONS & INPUTS (Existing styles remain) --- */
+        /* --- BUTTONS & INPUTS --- */
         button { 
             padding: 14px 30px; 
             margin: 8px; 
@@ -188,6 +188,38 @@
         #backBtn { left: 10px; display: none; }
         #chatOpenBtn { right: 100px; display: none; } 
 
+        /* --- GAME BOARD --- */
+        #game { 
+            grid-gap: 8px; 
+            padding: 10px;
+            background: var(--color-panel-bg); 
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(var(--board-size), 1fr);
+            width: 95%; /* Make it responsive */
+            max-width: 450px;
+            margin: 0 auto;
+        } 
+        .cell { 
+            aspect-ratio: 1 / 1; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: var(--font-size, 3rem); 
+            font-weight: 900;
+            cursor: pointer;
+            background: #242629; 
+            color: var(--color-text-light); 
+            border-radius: 5px;
+        } 
+        .cell:hover { background: #393e46; }
+        .cell.winner { 
+            background: var(--color-secondary-accent); 
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
+            color: var(--color-dark-bg);
+        } 
+        
         /* --- CHAT OVERLAY (Unchanged) --- */
         #chat-overlay {
             position: fixed;
@@ -396,22 +428,28 @@
     <script>
         
         // --- NEW SPLASH SCREEN HANDLER ---
-        const playButton = document.getElementById('play-button');
-        const loadingSpinner = document.getElementById('loading-spinner');
         const LOADING_TIME_MS = 5000; // 5 seconds
 
+        // Fetching elements early
+        const playButton = document.getElementById('play-button');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        
+        /**
+         * Handles the click on the "PLAY GAME" button, showing the spinner
+         * and waiting for the loading time before transitioning to the home screen.
+         */
         function handlePlayClick() {
             // 1. Hide the button and show the spinner
-            playButton.style.display = 'none';
-            loadingSpinner.style.display = 'block';
+            if (playButton) playButton.style.display = 'none';
+            if (loadingSpinner) loadingSpinner.style.display = 'block';
 
             // 2. Start the loading sequence
             setTimeout(() => {
                 // 3. Navigate to the home screen after the delay
                 showScreen('home-screen');
-                // 4. Reset spinner for future use (though typically splash screen isn't revisited)
-                loadingSpinner.style.display = 'none';
-                playButton.style.display = 'block'; 
+                // 4. Reset splash screen state (optional, as it's typically hidden)
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+                if (playButton) playButton.style.display = 'block'; 
             }, LOADING_TIME_MS);
         }
 
@@ -486,7 +524,7 @@
         const chatOverlay = document.getElementById('chat-overlay');
 
 
-        // --- SCREEN MANAGEMENT (Updated initial call) ---
+        // --- SCREEN MANAGEMENT ---
         
         function showScreen(screenId, isGameStart = false) {
             // Hide all full-page screens
@@ -722,6 +760,11 @@
                 cell.onclick = () => handleClick(i); 
                 gameDiv.appendChild(cell); 
             }); 
+            
+            // Set grid properties dynamically (moved here for responsive updates)
+            if (gameDiv && boardSize) {
+                gameDiv.style.setProperty('--board-size', boardSize);
+            }
             
             if (currentScreen === 'game-screen') {
                 if (mode === 'online' && localPlayer) { 
@@ -1136,13 +1179,13 @@
         } 
         
         // --- JAVASCRIPT FIX FOR MOBILE VH SCROLLING (Unchanged) ---
+        let resizeTimer; // Define resizeTimer globally
 
         function setAppHeight() {
             let vh = window.innerHeight * 0.01;
             document.documentElement.style.setProperty('--vh', `${vh}px`);
             
             const screenWidth = Math.min(window.innerWidth, 600);
-            const padding = 40; 
             const chatInputArea = document.querySelector('#chat-overlay #chat-input-area');
             if (chatInputArea) {
                 const overlayWidth = Math.min(window.innerWidth * 0.8, 350);
