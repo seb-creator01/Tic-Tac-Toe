@@ -169,7 +169,7 @@
             font-weight: bold;
             color: #f05a7f; 
             margin-bottom: 10px;
-            display: none; 
+            /* Timer is initially hidden based on JS logic (TIMER_START_SECONDS) */
         }
         .timer-warning {
             color: #ffcc00; /* Yellow for approaching limit */
@@ -312,7 +312,7 @@
         const chatMessages = document.getElementById('chat-messages'); 
         const chatInput = document.getElementById('chatInput'); 
         const timerDisplay = document.getElementById('timer'); 
-        const timerValueSpan = document.getElementById('timerValue'); // NEW span for value
+        const timerValueSpan = document.getElementById('timerValue'); 
 
         // --- Turn Timer Logic ---
 
@@ -340,8 +340,14 @@
                 // Local/AI Mode
                 gameStatusP.textContent = `Time expired for ${currentPlayer}! Turn passed to ${nextPlayer}.`;
                 currentPlayer = nextPlayer;
-                resetLocalTimer(); // Resets the local clock for the new player
+                // Since the turn passed, the new player gets a full clock
+                resetLocalTimer(); 
                 drawBoard();
+
+                if (mode === 'ai' && currentPlayer === 'O') {
+                    // If turn passes to AI, trigger its move
+                    setTimeout(aiMove, 500);
+                }
             }
         }
 
@@ -455,7 +461,7 @@
                 cell.textContent = val; 
                 cell.setAttribute('data-index', i); 
                 
-                const result = checkWinner(board, true); // Use true to check the global board
+                const result = checkWinner(board, false); // Only check winner for styling, don't update global state yet
                 if (!gameActive && result.winningIndices && result.winningIndices.includes(i)) { 
                     cell.classList.add('winner'); 
                 } 
@@ -463,7 +469,7 @@
                 gameDiv.appendChild(cell); 
             }); 
             
-            // Update status for online play 
+            // Update status text
             if (mode === 'online' && localPlayer) { 
                 if (!gameActive) { 
                     const result = checkWinner(board, false);
@@ -475,12 +481,8 @@
                 } 
             } else if (mode === 'online') { 
                 gameStatusP.textContent = 'Waiting to create or join a game...'; 
-            } 
-            
-            // Trigger AI move
-            if (mode === 'ai' && currentPlayer === 'O' && gameActive && boardSize === 3) {
-                // Short delay for visual effect
-                setTimeout(aiMove, 500); 
+            } else if (gameActive) {
+                gameStatusP.textContent = `${currentPlayer}'s turn.`;
             }
         } 
 
@@ -494,24 +496,34 @@
                 } 
                 handleOnlineMove(index); 
             } else { 
+                // Local or AI Mode Player X move
                 board[index] = currentPlayer; 
                 drawBoard(); 
+                
                 const result = checkWinner(board, true);
                 if (result.winner) {
+                    // Game Over
                     gameActive = false;
                     updateLocalScore(result.winner);
                     setTimeout(resetGame, 2000);
                 } else {
+                    // Turn Switch
                     currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; 
-                    resetLocalTimer(); 
+                    resetLocalTimer(); // Start timer for the new player (O or X)
+
+                    // Trigger AI move immediately if the new player is O
+                    if (mode === 'ai' && currentPlayer === 'O' && boardSize === 3) {
+                        setTimeout(aiMove, 500); 
+                    }
                 }
             } 
         } 
 
         function checkWinner(currentBoard, updateGlobalState = false) {
             const size = boardSize;
-            // For 3x3 (AI/Minimax), we only look for 3 in a row, even if boardSize is set higher for local play.
-            const N = (updateGlobalState && size > 3) ? size : 3; 
+            // The N value determines how many in a row wins. 
+            // In pure 3x3 (AI/Minimax), N=3. For larger local boards, N=size.
+            const N = (mode === 'ai' || size === 3) ? 3 : size; 
 
             const index = (r, c) => r * size + c;
             const isValid = (r, c) => r >= 0 && r < size && c >= 0 && c < size;
@@ -592,14 +604,20 @@
             currentPlayer = 'X'; 
             gameActive = true; 
             drawBoard(); 
-            resetLocalTimer(); 
+            resetLocalTimer(); // Start timer for X
             gameStatusP.textContent = (mode === 'local' || mode === 'ai') ? `Game started. X's turn.` : `You are ${localPlayer}. It is X's turn.`;
         } 
         
         function setActiveButton(activeButton) { 
+            // Clear active class from main controls
             document.querySelectorAll('#controls button').forEach(btn => { 
                 if (btn.id !== 'muteBtn') btn.classList.remove('active'); 
             }); 
+            // Clear active class from AI controls
+            document.querySelectorAll('#aiControls button').forEach(btn => { 
+                btn.classList.remove('active'); 
+            });
+            
             if (activeButton) { 
                 activeButton.classList.add('active'); 
             } 
@@ -608,6 +626,7 @@
         function startGame(selectedMode, difficulty, button) { 
             mode = selectedMode; 
             
+            // Clear active class from main controls, but apply to the mode button clicked
             document.querySelectorAll('#controls button').forEach(btn => { 
                 if (btn.id !== 'muteBtn') btn.classList.remove('active'); 
             }); 
@@ -615,11 +634,17 @@
                 button.classList.add('active'); 
             } 
             
+            // Handle AI button activation
             document.querySelectorAll('#aiControls button').forEach(btn => { 
                 btn.classList.remove('active'); 
             });
             if (mode === 'ai') {
-                button.classList.add('active'); 
+                aiDifficulty = difficulty; 
+                // Find and activate the correct AI difficulty button
+                if (button && button.parentElement.id === 'aiControls') {
+                    button.classList.add('active'); 
+                }
+
                 if (boardSize !== 3) {
                     const localBtn = document.querySelector('#controls button:nth-child(1)');
                     startGame('local', null, localBtn);
@@ -641,7 +666,6 @@
             scoreO.textContent = '0'; 
             scoreDraws.textContent = '0'; 
             
-            if (mode === 'ai') aiDifficulty = difficulty; 
             resetGame(); 
             
             gameStatusP.textContent = `Game started locally or vs AI on ${boardSize}x${boardSize}.`; 
@@ -655,6 +679,7 @@
             mode = 'online'; 
             setActiveButton(button); 
             
+            // Hide AI buttons/activation
             document.querySelectorAll('#aiControls button').forEach(btn => btn.classList.remove('active'));
             
             onlineControlsDiv.style.display = 'block'; 
@@ -673,7 +698,7 @@
             drawBoard();
         } 
 
-        // --- Online Multiplayer Functions (Modified for Timer/Game Flow) --- 
+        // --- Online Multiplayer Functions (No changes needed) --- 
         function sendChatMessage() {
             if (!db || !roomId || !localPlayer) return;
 
@@ -934,7 +959,7 @@
                 const result = checkWinner(board, true); // Check winner and update global state
                 if (!result.winner) {
                     currentPlayer = 'X'; 
-                    resetLocalTimer(); 
+                    resetLocalTimer(); // Start timer for X again
                 }
             } 
         } 
