@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="height: 100%; overflow: hidden;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,16 +7,16 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        /* --- GENERAL & LAYOUT STYLES --- */
-        body { 
-            background: linear-gradient(135deg, #7f5af0, #2cb67d); 
-            font-family: 'Segoe UI', sans-serif; 
+        /* --- CRITICAL LAYOUT STYLES --- */
+        html, body {
+            height: 100%; /* Must be 100% of viewport */
             margin: 0; 
             padding: 0; 
+            overflow: hidden; /* **CRITICAL: No scrollbars on the main page** */
+            font-family: 'Segoe UI', sans-serif; 
+            background: linear-gradient(135deg, #7f5af0, #2cb67d); 
             color: white; 
             text-align: center; 
-            height: 100vh;
-            overflow: hidden; /* **Crucial: Prevents main body scrolling** */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -34,7 +34,8 @@
             display: none; /* All screens are hidden by default */
             padding: 20px;
             box-sizing: border-box;
-            overflow-y: auto; /* Allows content within the screen to scroll if needed */
+            /* Allow internal content to scroll, but only if necessary */
+            overflow-y: auto; 
             padding-top: 60px; /* Space for fixed controls */
         }
         
@@ -42,13 +43,13 @@
             display: block;
         }
 
-        h1 { margin: 20px 0; } 
+        h1 { margin: 10px 0 20px 0; } 
         h2 { margin-top: 5px; margin-bottom: 20px;}
         
         /* --- BUTTON STYLES --- */
         button { 
-            padding: 12px 25px; /* Slightly larger buttons */
-            margin: 10px; /* More spacing */
+            padding: 12px 25px; 
+            margin: 10px; 
             border: none; 
             background: #fffffe; 
             color: #0f0f0f; 
@@ -84,13 +85,13 @@
         }
         #muteBtn { right: 10px; }
         #backBtn { left: 10px; display: none; }
-        #chatOpenBtn { left: 100px; display: none; } /* Offset from back button */
+        #chatOpenBtn { left: 100px; display: none; }
 
         /* --- BOARD STYLES --- */
         #game-board-container { 
             display: flex; 
             justify-content: center; 
-            margin: 20px auto; 
+            margin: 10px auto; 
         } 
         #game { 
             display: grid; 
@@ -118,6 +119,7 @@
         /* --- SCOREBOARD & STATUS STYLES (Game Screen Only) --- */
         #scoreboard { 
             margin-top: 10px;
+            margin-bottom: 20px;
         } 
         .scoreboard-panel { 
             display: inline-block; 
@@ -139,26 +141,30 @@
             margin-bottom: 10px;
         }
 
-        /* --- CHAT SCREEN STYLES --- */
+        /* --- CHAT SCREEN STYLES (Height fixed to prevent screen scroll) --- */
         #chat-screen {
             text-align: left;
+            display: flex;
+            flex-direction: column;
         }
         #chat-messages {
-            height: 70vh; /* Takes up most of the screen */
+            /* Dynamic height calculation to fit exactly between header and input area */
+            height: calc(100vh - 180px); 
             overflow-y: auto;
             margin-bottom: 10px;
             padding: 10px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
+            flex-grow: 1; 
         }
         #chat-input-area {
             display: flex;
-            position: absolute; /* Fixed to the bottom of the chat screen */
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 560px;
+            /* Anchored to the bottom of the chat screen */
+            position: sticky; 
+            bottom: -20px; 
+            width: 100%;
+            padding: 10px 0;
+            background: rgba(15, 15, 15, 0.5); 
         }
         #chat-input-area input {
             flex-grow: 1;
@@ -391,12 +397,12 @@
                     onlineScoreboardDiv.style.display = 'none';
                     gameTitle.textContent = mode === 'local' ? 'Local Friend Game' : `AI Game (${aiDifficulty})`;
                 } else if (mode === 'online' && localPlayer) {
-                    // Scoreboard visibility is handled by online sync
                     gameTitle.textContent = `Online Game (${localPlayer})`;
-                    if (db && roomId) syncGame(); // Ensure listener is active when returning to game screen
+                    localScoreboardDiv.style.display = 'none';
+                    onlineScoreboardDiv.style.display = 'inline-block';
+                    if (db && roomId) syncGame(); 
                 }
             } else if (screenId === 'local-config') {
-                 // Set initial state for local config
                  mode = 'local';
                  const size3x3Btn = document.getElementById('size3x3Btn');
                  setBoardSize(3, size3x3Btn, false, 'local-config');
@@ -412,14 +418,11 @@
             stopTimer();
             if (currentScreen === 'game-screen' || currentScreen === 'chat-screen') {
                 if (mode === 'online') {
-                    // Game/Chat back to Online Lobby
                     showScreen('online-lobby');
                 } else {
-                    // Local/AI back to Config
                     showScreen('local-config');
                 }
             } else if (currentScreen === 'online-lobby' || currentScreen === 'local-config') {
-                // Lobby/Config back to Home
                 if (mode === 'online' && roomId && db) {
                      db.ref('games/' + roomId).off();
                      roomId = null;
@@ -429,7 +432,7 @@
                 }
                 showScreen('home-screen');
             }
-            mode = 'local'; // Reset mode for safety when returning to home/config
+            mode = 'local'; 
         }
         
         // --- Timer Logic (Unchanged) ---
@@ -526,22 +529,21 @@
             gameDiv.style.setProperty('--font-size', `${fontSize}px`);
             
             // --- UI/Button Activation Logic ---
-            document.querySelectorAll(`#${location} button`).forEach(btn => { 
+            const sizeControlsId = location === 'local-config' ? 'boardSizeControls' : 'onlineBoardSizeControls';
+            document.querySelectorAll(`#${sizeControlsId} button`).forEach(btn => { 
                 btn.classList.remove('active'); 
             }); 
             if (button) { 
                 button.classList.add('active'); 
             }
             
-            // Update Lobby Display
+            // Sync active state between lobby and config screens
             if (location === 'online-lobby') {
                 lobbyBoardSizeSpan.textContent = `${size}x${size}`;
-                // Keep the same board size active in the local config screen visually too
                 const localBtn = document.querySelector(`#local-config #boardSizeControls button:nth-child(${size - 2})`);
                 document.querySelectorAll('#local-config #boardSizeControls button').forEach(btn => btn.classList.remove('active'));
                 if (localBtn) localBtn.classList.add('active');
-            } else { // Local config
-                // Keep the same board size active in the online config screen visually too
+            } else { 
                  const onlineBtn = document.querySelector(`#online-lobby #onlineBoardSizeControls button:nth-child(${size - 2})`);
                 document.querySelectorAll('#online-lobby #onlineBoardSizeControls button').forEach(btn => btn.classList.remove('active'));
                 if (onlineBtn) onlineBtn.classList.add('active');
@@ -563,7 +565,6 @@
                 return;
             }
             
-            // Logic after size button click:
             if (location === 'local-config') {
                 if (mode === 'ai' && size !== 3) {
                     const localBtn = document.getElementById('localPlayBtn'); 
@@ -573,7 +574,6 @@
                 }
                 drawBoard();
             } else if (location === 'online-lobby' && mode === 'online' && roomId && localPlayer) {
-                // If connected, update Firebase to force a new game on the new size
                 db.ref('games/' + roomId).update({
                     boardSize: size,
                     board: Array(size * size).fill(''),
@@ -696,7 +696,7 @@
             return {}; 
         }
 
-        // --- Score Management, Game Flow, and Mode Switching --- 
+        // --- Score Management, Game Flow, and Mode Switching (Unchanged) --- 
         function updateLocalScore(winner) { 
             if (winner === 'X') scoreX.textContent = +scoreX.textContent + 1; 
             else if (winner === 'O') scoreO.textContent = +scoreO.textContent + 1; 
@@ -742,13 +742,12 @@
                 aiDifficulty = difficulty; 
                 button.classList.add('active');
             }
-            // Reset scores on configuration change (like a new game session)
             scoreX.textContent = '0'; 
             scoreO.textContent = '0'; 
             scoreDraws.textContent = '0'; 
         } 
         
-        // --- Online Multiplayer Functions --- 
+        // --- Online Multiplayer Functions (Unchanged) --- 
 
         function sendChatMessage() {
             if (!db || !roomId || !localPlayer) return;
@@ -760,7 +759,7 @@
             chatRef.push({
                 sender: localPlayer,
                 message: message,
-                timestamp: db.database.ServerValue.TIMESTAMP
+                timestamp: firebase.database.ServerValue.TIMESTAMP
             });
 
             chatInput.value = '';
@@ -803,16 +802,14 @@
                 playerX: true, 
                 playerO: false, 
                 scores: { scoreX: 0, scoreO: 0, draws: 0 },
-                lastMoveTime: db.database.ServerValue.TIMESTAMP 
+                lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
             }).then(() => { 
                 document.getElementById('onlineStatus').textContent = `Game created! Your ID is: ${roomId}. Waiting for Player O...`; 
                 roomIdInput.value = roomId; 
                 startGameOnlineBtn.style.display = 'block';
-                // Reset scores visually for the new session
                 document.getElementById('onlineScoreLocal').textContent = '0'; 
                 document.getElementById('onlineScoreOpponent').textContent = '0'; 
                 document.getElementById('onlineScoreDraws').textContent = '0'; 
-
                 syncGame(); 
                 syncChat(); 
             }); 
@@ -890,7 +887,7 @@
                                     currentPlayer: 'X', 
                                     gameActive: true, 
                                     boardSize: currentGameState.boardSize, 
-                                    lastMoveTime: db.database.ServerValue.TIMESTAMP 
+                                    lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
                                 });
                             });
                         }
@@ -916,7 +913,7 @@
                     board: tempBoard, 
                     currentPlayer: nextPlayer, 
                     gameActive: true,
-                    lastMoveTime: db.database.ServerValue.TIMESTAMP 
+                    lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
                 };
 
                 if (result.winner || result.winner === 'Draw') {
@@ -1023,18 +1020,13 @@
 
         // --- Initial Setup and Resize Fix ---
         document.addEventListener('DOMContentLoaded', () => {
-            // Initial setup: Show home screen, set default config
             showScreen('home-screen');
-            
-            // Apply initial board sizing to ensure game screen looks right if accessed directly
             const size3x3Btn = document.getElementById('size3x3Btn');
             setBoardSize(3, size3x3Btn, false, 'local-config');
 
-            // --- Resize Fix ---
             let resizeTimer;
             window.addEventListener('resize', () => {
                 clearTimeout(resizeTimer); 
-
                 resizeTimer = setTimeout(() => {
                     setBoardSize(boardSize, null, true, currentScreen);
                 }, 250); 
