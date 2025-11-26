@@ -834,4 +834,164 @@
                                     else if (result.winner === 'Draw') newScores.draws++; 
                                     
                                     const newBoardLength = boardSize * boardSize;
-                                    db
+                                    db.ref('games/' + roomId).update({ 
+                                        board: Array(newBoardLength).fill(''), 
+                                        currentPlayer: 'X', 
+                                        gameActive: true, 
+                                        scores: newScores,
+                                        lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
+                                    }); 
+                                } else { 
+                                    db.ref('games/' + roomId).off(); 
+                                    gameStatusP.textContent = `Game disconnected. Scores: X-${gameState.scores.scoreX}, O-${gameState.scores.scoreO}, Draws-${gameState.scores.draws}`; 
+                                } 
+                            }, 3000); 
+                        } else {
+                            gameStatusP.textContent = `Game Over! ${result.winner === 'Draw' ? 'It\'s a Draw!' : `${result.winner} wins!`}. Waiting for X to start a new round...`;
+                        }
+                    } 
+                } 
+            }); 
+        } 
+        
+        function handleOnlineMove(index) { 
+            if (!db) return;
+            stopTimer(); // Stop timer immediately on move
+            
+            board[index] = localPlayer; 
+            const result = checkWinner(board, false); 
+            const nextPlayer = localPlayer === 'X' ? 'O' : 'X'; 
+            
+            // NOTE: drawBoard() is called by syncGame after the Firebase update
+            db.ref('games/' + roomId).update({ 
+                board: board, 
+                currentPlayer: result.winner || result.winner === 'Draw' ? localPlayer : nextPlayer, 
+                gameActive: result.winner || result.winner === 'Draw' ? false : true,
+                lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
+            }); 
+        } 
+
+        // ------------------------------------------------------------------------------------------------
+        // --- MINIMAX AI LOGIC (3x3 only) ---
+        // ------------------------------------------------------------------------------------------------
+        
+        const scores = { 'O': 10, 'X': -10, 'Draw': 0 }; 
+
+        function getEmptyIndices(currentBoard) {
+            return currentBoard.map((v, i) => v === '' ? i : null).filter(v => v !== null);
+        }
+        
+        /**
+         * The Minimax algorithm that recursively evaluates the board state (3x3 only).
+         */
+        function minimax(currentBoard, player) {
+            // CRITICAL FIX: Use checkWinner with updateGlobalState=false to prevent global state corruption.
+            const result = checkWinner(currentBoard, false); 
+            
+            if (result.winner !== undefined && result.winner !== null) {
+                return scores[result.winner]; 
+            }
+        
+            let availableSpots = getEmptyIndices(currentBoard);
+        
+            if (player === 'O') {
+                // AI (Maximizer)
+                let bestScore = -Infinity;
+                for (let i of availableSpots) {
+                    let nextBoard = currentBoard.slice(); 
+                    nextBoard[i] = player;
+                    
+                    let score = minimax(nextBoard, 'X'); 
+                    bestScore = Math.max(score, bestScore);
+                }
+                return bestScore;
+            } else {
+                // Human (Minimizer)
+                let bestScore = Infinity;
+                for (let i of availableSpots) {
+                    let nextBoard = currentBoard.slice(); 
+                    nextBoard[i] = player;
+                    
+                    let score = minimax(nextBoard, 'O'); 
+                    bestScore = Math.min(score, bestScore);
+                }
+                return bestScore;
+            }
+        }
+        
+        function getBestMove(currentBoard) {
+            let bestScore = -Infinity;
+            let move = -1;
+            let availableSpots = getEmptyIndices(currentBoard);
+        
+            for (let i of availableSpots) {
+                let tempBoard = currentBoard.slice(); 
+                tempBoard[i] = 'O'; 
+                
+                let score = minimax(tempBoard, 'X'); 
+                
+                if (score > bestScore) {
+                    bestScore = score;
+                    move = i;
+                }
+            }
+            return move;
+        }
+
+        function aiMove() { 
+            if (!gameActive || currentPlayer !== 'O' || boardSize !== 3) return; 
+            
+            stopTimer(); // Stop the timer while AI calculates
+            
+            let empty = getEmptyIndices(board); 
+            let move = -1; 
+
+            if (aiDifficulty === 'easy') { 
+                move = empty[Math.floor(Math.random() * empty.length)]; 
+            } else if (aiDifficulty === 'normal') { 
+                if (Math.random() < 0.75) { 
+                    move = getBestMove(board); 
+                } else { 
+                    move = empty[Math.floor(Math.random() * empty.length)]; 
+                } 
+            } else if (aiDifficulty === 'hard') { 
+                move = getBestMove(board); 
+            } 
+
+            if (move !== -1) { 
+                board[move] = 'O'; 
+                
+                const result = checkWinner(board, true); // Check winner and update global state
+                
+                if (result.winner) {
+                    // Game Over
+                    updateLocalScore(result.winner);
+                    drawBoard(); // REDRAW with winning highlight
+                    setTimeout(resetGame, 2000);
+                } else {
+                    // Turn Switch
+                    currentPlayer = 'X'; 
+                    drawBoard(); 
+                    resetLocalTimer(); // Start timer for X again
+                }
+            } 
+        } 
+
+        function toggleMute() { 
+            isMuted = !isMuted; 
+            bgMusic.muted = isMuted; 
+            document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊'; 
+        } 
+
+        // Initial setup
+        document.addEventListener('DOMContentLoaded', () => {
+            const size3x3Btn = document.getElementById('size3x3Btn');
+            setBoardSize(3, size3x3Btn);
+            
+            const localBtn = document.querySelector('#controls button:nth-child(1)');
+            startGame('local', null, localBtn);
+        });
+        
+    </script>
+</body>
+</html>
