@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tic Tac Toe by Seb-Creations</title>
+    <title>Tic Tac Toe Game</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -15,9 +15,8 @@
             padding: 0; 
             color: white; 
             text-align: center; 
-            /* Fix: Prevent scrolling on the body */
             height: 100vh;
-            overflow: hidden; 
+            overflow: hidden; /* **Crucial: Prevents main body scrolling** */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,44 +26,67 @@
         .screen {
             width: 100%;
             height: 100%;
-            max-width: 600px; /* Optional: cap screen width on desktop */
-            position: absolute; /* Allows overlaying screens */
+            max-width: 600px;
+            position: absolute;
             top: 0;
             left: 50%;
             transform: translateX(-50%);
             display: none; /* All screens are hidden by default */
             padding: 20px;
             box-sizing: border-box;
-            overflow-y: auto; /* Allows internal content to scroll if needed */
+            overflow-y: auto; /* Allows content within the screen to scroll if needed */
+            padding-top: 60px; /* Space for fixed controls */
         }
         
         .screen.active {
             display: block;
         }
 
-        h1 { margin-top: 20px; } 
+        h1 { margin: 20px 0; } 
+        h2 { margin-top: 5px; margin-bottom: 20px;}
         
         /* --- BUTTON STYLES --- */
         button { 
-            padding: 10px 20px; 
-            margin: 5px; 
+            padding: 12px 25px; /* Slightly larger buttons */
+            margin: 10px; /* More spacing */
             border: none; 
             background: #fffffe; 
             color: #0f0f0f; 
             font-weight: bold; 
-            border-radius: 5px; 
+            border-radius: 8px; 
             cursor: pointer; 
-            transition: background 0.3s, color 0.3s; 
+            transition: background 0.3s, transform 0.1s; 
             touch-action: manipulation;
+            font-size: 1rem;
         } 
         button.active { 
             background: #7f5af0; 
             color: #fffffe; 
             border: 2px solid #2cb67d; 
-            transform: scale(1.05); 
+            transform: scale(1.02); 
         } 
         
-        /* --- BOARD STYLES (Kept separate for game screen) --- */
+        #home-screen button {
+            width: 80%;
+            max-width: 300px;
+            font-size: 1.2rem;
+            margin: 15px;
+        }
+        
+        /* Fixed top controls */
+        .fixed-control {
+            position: fixed;
+            top: 10px;
+            z-index: 1000;
+            font-size: 1rem;
+            padding: 8px 15px;
+            margin: 5px;
+        }
+        #muteBtn { right: 10px; }
+        #backBtn { left: 10px; display: none; }
+        #chatOpenBtn { left: 100px; display: none; } /* Offset from back button */
+
+        /* --- BOARD STYLES --- */
         #game-board-container { 
             display: flex; 
             justify-content: center; 
@@ -93,14 +115,14 @@
             background: #2cb67d; 
         } 
         
-        /* --- SCOREBOARD & STATUS STYLES --- */
+        /* --- SCOREBOARD & STATUS STYLES (Game Screen Only) --- */
         #scoreboard { 
-            margin-top: 20px; 
+            margin-top: 10px;
         } 
         .scoreboard-panel { 
             display: inline-block; 
             padding: 10px 20px; 
-            margin: 10px; 
+            margin: 10px 5px; 
             border-radius: 8px; 
             background: rgba(0, 0, 0, 0.2); 
             text-align: left; 
@@ -116,16 +138,13 @@
             color: #f05a7f; 
             margin-bottom: 10px;
         }
-        .timer-warning { color: #ffcc00; }
-        .timer-critical { color: #ff0000; }
-        
-        /* --- CHAT STYLES (Moved to its own screen) --- */
+
+        /* --- CHAT SCREEN STYLES --- */
         #chat-screen {
             text-align: left;
-            padding-top: 60px; /* Space for the back button */
         }
         #chat-messages {
-            height: 350px;
+            height: 70vh; /* Takes up most of the screen */
             overflow-y: auto;
             margin-bottom: 10px;
             padding: 10px;
@@ -134,15 +153,21 @@
         }
         #chat-input-area {
             display: flex;
+            position: absolute; /* Fixed to the bottom of the chat screen */
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 560px;
         }
         #chat-input-area input {
             flex-grow: 1;
-            padding: 8px;
+            padding: 10px;
             border: none;
             border-radius: 4px 0 0 4px;
         }
         #chat-input-area button {
-            padding: 8px 15px;
+            padding: 10px 15px;
             background: #2cb67d;
             color: white;
             border: none;
@@ -152,31 +177,12 @@
         .chat-message-x { color: #7f5af0; } 
         .chat-message-o { color: #2cb67d; } 
 
-        /* Fixed controls */
-        .fixed-control {
-            position: fixed;
-            top: 10px;
-            z-index: 1000;
-        }
-        #muteBtn { right: 10px; }
-        #backBtn, #chatOpenBtn { left: 10px; display: none; } /* Managed by JS */
-
-        /* Online Lobby */
-        #online-lobby input {
-            padding: 10px;
-            margin: 10px 0;
-            border: none;
-            border-radius: 5px;
-            width: 80%;
-            max-width: 300px;
-            color: #0f0f0f;
-        }
         /* Footer */
         footer { 
             position: absolute;
             bottom: 10px;
             width: 100%;
-            font-size: 1.2rem; 
+            font-size: 1rem; 
             color: #94a1b2; 
         } 
         footer b { color: #fffffe; } 
@@ -189,9 +195,9 @@
     <button id="chatOpenBtn" onclick="showScreen('chat-screen')" class="fixed-control">💬 Chat</button>
 
     <div id="home-screen" class="screen active">
-        <h1>Tic Tac Toe / N-in-a-Row</h1>
+        <h1>Tic Tac Toe Game</h1>
         
-        <div id="main-controls" style="display: flex; flex-direction: column; align-items: center;">
+        <div id="main-controls" style="display: flex; flex-direction: column; align-items: center; margin-top: 50px;">
             <button onclick="showScreen('local-config')">Play Local / AI</button>
             <button onclick="showScreen('online-lobby')">Online Multiplayer</button>
         </div>
@@ -208,15 +214,15 @@
         </div>
 
         <div id="modeControls">
-            <h3>Select Mode</h3>
-            <button id="localPlayBtn" onclick="startGame('local', null, this)">Play with Friend (Same Device)</button>
+            <h3>Select Player Mode</h3>
+            <button id="localPlayBtn" onclick="startGame('local', null, this)">Play Friend (Same Device)</button>
         </div>
 
         <div id="aiControls" style="margin-top: 15px;">
             <h3>Play AI (3x3 Only)</h3>
-            <button onclick="startGame('ai', 'easy', this)">Easy</button>
-            <button onclick="startGame('ai', 'normal', this)">Normal</button>
-            <button onclick="startGame('ai', 'hard', this)">Hard</button>
+            <button onclick="startGame('ai', 'easy', this)">Easy AI</button>
+            <button onclick="startGame('ai', 'normal', this)">Normal AI</button>
+            <button onclick="startGame('ai', 'hard', this)">Hard AI</button>
         </div>
         
         <button style="margin-top: 30px;" onclick="showScreen('game-screen', true)">Start Game</button>
@@ -233,19 +239,19 @@
                 <button onclick="setBoardSize(5, this, false, 'online-lobby')">5x5</button>
             </div>
             
-            <input type="text" id="roomIdInput" placeholder="Enter Room ID">
+            <input type="text" id="roomIdInput" placeholder="Enter Room ID" style="margin: 20px 0;">
             <p id="onlineStatus">Enter an ID or create a game.</p>
             <button onclick="createGame()">Create Game (I am X)</button>
             <button onclick="joinGame()">Join Game (I am O)</button>
-            <button onclick="showScreen('game-screen', true)" id="startGameOnlineBtn" style="display: none; margin-top: 20px;">Go to Game</button>
+            <button onclick="showScreen('game-screen', true)" id="startGameOnlineBtn" style="display: none; margin-top: 20px; background: #2cb67d; color: white;">Go to Game Screen</button>
         </div>
     </div>
 
     <div id="game-screen" class="screen">
         <h2 id="gameTitle">Local Game</h2>
-        <p id="gameStatus">Game in progress...</p>
         
         <div id="game-info">
+            <p id="gameStatus">Game in progress...</p>
             <p id="timer" style="display: none;">Turn Time: <span id="timerValue">0s</span></p>
             
             <div id="game-board-container">
@@ -323,7 +329,7 @@
         let aiDifficulty = 'easy'; 
         let localPlayer = null; 
         let roomId = null; 
-        let currentScreen = 'home-screen'; // Track the current active screen
+        let currentScreen = 'home-screen';
         
         // --- Timer State Variables ---
         let timerInterval = null; 
@@ -373,40 +379,47 @@
                 currentScreen = screenId;
             }
 
-            // Manage fixed buttons (Back, Chat, Mute)
+            // Manage fixed buttons (Back, Chat)
             backBtn.style.display = (screenId === 'home-screen') ? 'none' : 'block';
-            chatOpenBtn.style.display = (screenId === 'game-screen' && mode === 'online') ? 'block' : 'none';
+            chatOpenBtn.style.display = (screenId === 'game-screen' && mode === 'online' && localPlayer) ? 'block' : 'none';
             
-            // Special handling for game screen
+            // Special handling for screen transitions
             if (screenId === 'game-screen' && isGameStart) {
                 if (mode === 'local' || mode === 'ai') {
                     resetGame();
+                    localScoreboardDiv.style.display = 'inline-block';
+                    onlineScoreboardDiv.style.display = 'none';
                     gameTitle.textContent = mode === 'local' ? 'Local Friend Game' : `AI Game (${aiDifficulty})`;
                 } else if (mode === 'online' && localPlayer) {
+                    // Scoreboard visibility is handled by online sync
                     gameTitle.textContent = `Online Game (${localPlayer})`;
+                    if (db && roomId) syncGame(); // Ensure listener is active when returning to game screen
                 }
             } else if (screenId === 'local-config') {
-                 // Ensure local mode starts clean
+                 // Set initial state for local config
                  mode = 'local';
-                 // Ensure the 3x3 button is active visually if returning to local config
                  const size3x3Btn = document.getElementById('size3x3Btn');
                  setBoardSize(3, size3x3Btn, false, 'local-config');
                  startGame('local', null, document.getElementById('localPlayBtn'));
+            } else if (screenId === 'online-lobby') {
+                 mode = 'online';
+                 const online3x3Btn = document.getElementById('onlineSize3x3Btn');
+                 setBoardSize(boardSize, online3x3Btn, false, 'online-lobby');
             }
         }
 
         function handleBack(isUserInitiated = false) {
             stopTimer();
-            if (currentScreen === 'game-screen') {
+            if (currentScreen === 'game-screen' || currentScreen === 'chat-screen') {
                 if (mode === 'online') {
-                    // Go back to online lobby, but remain in the room
+                    // Game/Chat back to Online Lobby
                     showScreen('online-lobby');
                 } else {
-                    // Local/AI, go back to config
+                    // Local/AI back to Config
                     showScreen('local-config');
                 }
-            } else if (currentScreen === 'online-lobby' || currentScreen === 'local-config' || currentScreen === 'chat-screen') {
-                // Disconnect Firebase listeners if coming from the online lobby/chat
+            } else if (currentScreen === 'online-lobby' || currentScreen === 'local-config') {
+                // Lobby/Config back to Home
                 if (mode === 'online' && roomId && db) {
                      db.ref('games/' + roomId).off();
                      roomId = null;
@@ -416,12 +429,10 @@
                 }
                 showScreen('home-screen');
             }
-            // For safety, set back to default mode
-            mode = 'local';
+            mode = 'local'; // Reset mode for safety when returning to home/config
         }
         
         // --- Timer Logic (Unchanged) ---
-
         function handleTimeLimitReached() {
             if (!gameActive) { stopTimer(); return; }
             const nextPlayer = currentPlayer === 'X' ? 'O' : 'X';
@@ -500,7 +511,6 @@
             boardSize = size;
             const newBoardLength = size * size;
             
-            // Only reset the board array if the size changes AND it's not just a resize event
             if (!skipReset && previousSize !== size) {
                 board = Array(newBoardLength).fill('');
             }
@@ -526,7 +536,17 @@
             // Update Lobby Display
             if (location === 'online-lobby') {
                 lobbyBoardSizeSpan.textContent = `${size}x${size}`;
+                // Keep the same board size active in the local config screen visually too
+                const localBtn = document.querySelector(`#local-config #boardSizeControls button:nth-child(${size - 2})`);
+                document.querySelectorAll('#local-config #boardSizeControls button').forEach(btn => btn.classList.remove('active'));
+                if (localBtn) localBtn.classList.add('active');
+            } else { // Local config
+                // Keep the same board size active in the online config screen visually too
+                 const onlineBtn = document.querySelector(`#online-lobby #onlineBoardSizeControls button:nth-child(${size - 2})`);
+                document.querySelectorAll('#online-lobby #onlineBoardSizeControls button').forEach(btn => btn.classList.remove('active'));
+                if (onlineBtn) onlineBtn.classList.add('active');
             }
+
 
             // AI Controls visibility logic only relevant on local-config
             if (location === 'local-config') {
@@ -551,7 +571,6 @@
                     document.getElementById('gameStatus').textContent = `AI is only available for 3x3. Switched to Local mode for ${size}x${size}.`;
                     return;
                 }
-                // Redraw on size change in config
                 drawBoard();
             } else if (location === 'online-lobby' && mode === 'online' && roomId && localPlayer) {
                 // If connected, update Firebase to force a new game on the new size
@@ -560,14 +579,13 @@
                     board: Array(size * size).fill(''),
                     currentPlayer: 'X', 
                     gameActive: true,
-                    lastMoveTime: db.database.ServerValue.TIMESTAMP
+                    lastMoveTime: firebase.database.ServerValue.TIMESTAMP
                 });
             }
         }
         
         // --- Game Logic Functions (Unchanged) ---
         function drawBoard() { 
-            // ... (Draw board implementation is unchanged)
             gameDiv.innerHTML = ''; 
             const finalResult = !gameActive ? checkWinner(board, false) : {};
             
@@ -584,7 +602,6 @@
                 gameDiv.appendChild(cell); 
             }); 
             
-            // Update status text based on current screen
             if (currentScreen === 'game-screen') {
                 if (mode === 'online' && localPlayer) { 
                     if (!gameActive) { 
@@ -602,7 +619,6 @@
         } 
 
         function handleClick(index) { 
-            // ... (handleClick implementation is unchanged)
             if (!gameActive || board[index]) return; 
             
             if (mode === 'online') { 
@@ -631,7 +647,6 @@
         } 
 
         function checkWinner(currentBoard, updateGlobalState = false) {
-            // ... (checkWinner implementation is unchanged)
             const size = boardSize;
             const N = (mode === 'ai' || size === 3) ? 3 : size; 
 
@@ -683,14 +698,12 @@
 
         // --- Score Management, Game Flow, and Mode Switching --- 
         function updateLocalScore(winner) { 
-            // ... (updateLocalScore implementation is unchanged)
             if (winner === 'X') scoreX.textContent = +scoreX.textContent + 1; 
             else if (winner === 'O') scoreO.textContent = +scoreO.textContent + 1; 
             else if (winner === 'Draw') scoreDraws.textContent = +scoreDraws.textContent + 1; 
         } 
         
         function updateOnlineScoreboard(scores) { 
-            // ... (updateOnlineScoreboard implementation is unchanged)
             const localWinCount = localPlayer === 'X' ? scores.scoreX : scores.scoreO; 
             const opponentWinCount = localPlayer === 'X' ? scores.scoreO : scores.scoreX; 
             onlineScoreLocal.textContent = localWinCount; 
@@ -725,41 +738,17 @@
 
             if (mode === 'local') {
                 button.classList.add('active');
-                localScoreboardDiv.style.display = 'inline-block';
-                onlineScoreboardDiv.style.display = 'none';
             } else if (mode === 'ai') {
                 aiDifficulty = difficulty; 
                 button.classList.add('active');
-                localScoreboardDiv.style.display = 'inline-block';
-                onlineScoreboardDiv.style.display = 'none';
             }
-            // Scoreboards reset is handled on showScreen('local-config') or handleBack()
+            // Reset scores on configuration change (like a new game session)
+            scoreX.textContent = '0'; 
+            scoreO.textContent = '0'; 
+            scoreDraws.textContent = '0'; 
         } 
         
         // --- Online Multiplayer Functions --- 
-
-        function handleOnlineStart(button) { 
-            if (!db) {
-                document.getElementById('onlineStatus').textContent = "Online multiplayer requires the Firebase SDK to be loaded.";
-                return;
-            }
-            mode = 'online'; 
-            
-            // Set initial UI state for online lobby
-            const online3x3Btn = document.getElementById('onlineSize3x3Btn');
-            setBoardSize(3, online3x3Btn, false, 'online-lobby');
-
-            localScoreboardDiv.style.display = 'none';
-            onlineScoreboardDiv.style.display = 'inline-block';
-            
-            if (db && roomId) db.ref('games/' + roomId).off(); 
-            roomId = null; 
-            localPlayer = null;
-            startGameOnlineBtn.style.display = 'none';
-            document.getElementById('onlineStatus').textContent = 'Enter an ID or create a game.';
-
-            showScreen('online-lobby');
-        }
 
         function sendChatMessage() {
             if (!db || !roomId || !localPlayer) return;
@@ -819,6 +808,11 @@
                 document.getElementById('onlineStatus').textContent = `Game created! Your ID is: ${roomId}. Waiting for Player O...`; 
                 roomIdInput.value = roomId; 
                 startGameOnlineBtn.style.display = 'block';
+                // Reset scores visually for the new session
+                document.getElementById('onlineScoreLocal').textContent = '0'; 
+                document.getElementById('onlineScoreOpponent').textContent = '0'; 
+                document.getElementById('onlineScoreDraws').textContent = '0'; 
+
                 syncGame(); 
                 syncChat(); 
             }); 
@@ -864,7 +858,6 @@
                 const gameState = snapshot.val(); 
                 
                 if (gameState.boardSize && gameState.boardSize !== boardSize) {
-                    // Sync size change from opponent
                     setBoardSize(gameState.boardSize, null, true); 
                 }
 
@@ -908,7 +901,7 @@
         
         function handleOnlineMove(index) { 
             if (!db) return;
-            // ... (handleOnlineMove implementation is unchanged)
+            
             const tempBoard = board.slice();
             tempBoard[index] = localPlayer; 
             const result = checkWinner(tempBoard, false); 
@@ -949,7 +942,6 @@
         }
         
         function minimax(currentBoard, player) {
-            // ... (minimax implementation is unchanged)
             const result = checkWinner(currentBoard, false); 
             if (result.winner !== undefined && result.winner !== null) { return scores[result.winner]; }
             let availableSpots = getEmptyIndices(currentBoard);
@@ -975,7 +967,6 @@
         }
         
         function getBestMove(currentBoard) {
-            // ... (getBestMove implementation is unchanged)
             let bestScore = -Infinity;
             let move = -1;
             let availableSpots = getEmptyIndices(currentBoard);
@@ -992,7 +983,6 @@
         }
 
         function aiMove() { 
-            // ... (aiMove implementation is unchanged)
             if (!gameActive || currentPlayer !== 'O' || boardSize !== 3) return; 
             stopTimer(); 
             let empty = getEmptyIndices(board); 
@@ -1033,23 +1023,22 @@
 
         // --- Initial Setup and Resize Fix ---
         document.addEventListener('DOMContentLoaded', () => {
-            showScreen('home-screen'); // Start on the home screen
+            // Initial setup: Show home screen, set default config
+            showScreen('home-screen');
             
-            // Set up initial size for display
+            // Apply initial board sizing to ensure game screen looks right if accessed directly
             const size3x3Btn = document.getElementById('size3x3Btn');
             setBoardSize(3, size3x3Btn, false, 'local-config');
 
-            // --- FIX: Prevent restart on scroll/mobile viewport change using Debouncing ---
+            // --- Resize Fix ---
             let resizeTimer;
             window.addEventListener('resize', () => {
                 clearTimeout(resizeTimer); 
 
                 resizeTimer = setTimeout(() => {
-                    // Always call with skipReset=true to only update visuals
                     setBoardSize(boardSize, null, true, currentScreen);
                 }, 250); 
             });
-            // -----------------------------------------------------------------------------
         });
         
     </script>
