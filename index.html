@@ -82,7 +82,7 @@
             align-items: center;
             flex-direction: column;
             background: var(--color-dark-bg);
-            z-index: 200; /* Always on top initially */
+            z-index: 200; 
         }
         #splash-screen h1 {
             font-size: 4rem;
@@ -100,9 +100,44 @@
             color: var(--color-secondary-accent);
             text-shadow: 0 0 5px rgba(57, 255, 20, 0.8);
             margin-top: 20px;
+            margin-bottom: 30px; /* Added margin below tagline */
+        }
+        
+        /* New: Play Button Style */
+        #play-button {
+            background: var(--color-primary-accent); /* Electric Blue */
+            color: var(--color-dark-bg);
+            font-size: 1.5rem;
+            padding: 15px 50px;
+            border-radius: 50px;
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.8), 0 6px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.1s, opacity 0.3s;
+        }
+        #play-button:hover {
+            background: #4de6ff; /* Lighter blue on hover */
+        }
+        #play-button:active {
+            transform: scale(0.95);
         }
 
-        /* --- BUTTONS & INPUTS --- */
+        /* New: Loading Spinner Style */
+        #loading-spinner {
+            border: 8px solid var(--color-panel-bg); 
+            border-top: 8px solid var(--color-secondary-accent); /* Neon Green spinner */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1.5s linear infinite;
+            display: none; /* Hidden by default */
+            margin-top: 30px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- BUTTONS & INPUTS (Existing styles remain) --- */
         button { 
             padding: 14px 30px; 
             margin: 8px; 
@@ -114,10 +149,12 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
             font-size: 1rem;
             letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s; 
         } 
         button:hover { background: #393e46; }
         button.active { 
-            background: var(--color-secondary-accent); /* Neon Green */
+            background: var(--color-secondary-accent); 
             color: var(--color-dark-bg); 
             box-shadow: 0 0 10px rgba(57, 255, 20, 0.8), 0 4px 8px rgba(0, 0, 0, 0.5); 
             transform: translateY(-2px); 
@@ -149,37 +186,9 @@
         }
         #muteBtn { right: 10px; }
         #backBtn { left: 10px; display: none; }
-        #chatOpenBtn { right: 100px; display: none; } /* Moved chat button to the right */
+        #chatOpenBtn { right: 100px; display: none; } 
 
-        /* --- GAME BOARD --- */
-        #game { 
-            grid-gap: 8px; 
-            padding: 10px;
-            background: var(--color-panel-bg); 
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
-        } 
-        .cell { 
-            background: #242629; 
-            color: var(--color-text-light); 
-        } 
-        .cell:hover { background: #393e46; }
-        .cell.winner { 
-            background: var(--color-secondary-accent); /* Neon Green Win */
-            box-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
-            color: var(--color-dark-bg);
-        } 
-        
-        /* --- SCOREBOARD & STATUS --- */
-        #gameStatus { color: #94a1b2; }
-        #gameStatus strong { color: var(--color-primary-accent); }
-        .scoreboard-panel { background: var(--color-panel-bg); } 
-        .scoreboard-panel h2 { color: var(--color-secondary-accent); }
-        
-        /* Timer styles */
-        #timer { color: #ff8e3c; } 
-
-        /* --- CHAT OVERLAY (NON-EXISTING GAME FLOW) --- */
+        /* --- CHAT OVERLAY (Unchanged) --- */
         #chat-overlay {
             position: fixed;
             top: 0;
@@ -187,19 +196,19 @@
             width: 80%;
             max-width: 350px;
             height: calc(var(--vh, 1vh) * 100);
-            background: rgba(15, 15, 15, 0.95); /* Semi-transparent dark overlay */
+            background: rgba(15, 15, 15, 0.95); 
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
-            transform: translateX(100%); /* Start off-screen */
+            transform: translateX(100%); 
             transition: transform 0.3s ease-in-out;
-            z-index: 1002; /* Above everything except the fixed controls */
+            z-index: 1002; 
             display: flex;
             flex-direction: column;
-            padding-top: 50px; /* Space for the header */
+            padding-top: 50px; 
             box-sizing: border-box;
         }
 
         #chat-overlay.visible {
-            transform: translateX(0); /* Slide in */
+            transform: translateX(0); 
         }
         
         #chat-overlay h2 {
@@ -271,6 +280,10 @@
         <p>Seb Creations Presents</p>
         <h1>XOX ARENA</h1>
         <p id="tagline">“Think Fast. Strike Smart. Rule the Grid.”</p>
+        
+        <button id="play-button" onclick="handlePlayClick()">PLAY GAME</button>
+        
+        <div id="loading-spinner"></div>
     </div>
 
     <div id="home-screen" class="screen">
@@ -381,12 +394,26 @@
     <audio id="bgMusic" loop src="your_audio_file.mp3" preload="auto"></audio> 
 
     <script>
-        // Initial setup for the splash screen
-        document.addEventListener('DOMContentLoaded', () => {
+        
+        // --- NEW SPLASH SCREEN HANDLER ---
+        const playButton = document.getElementById('play-button');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const LOADING_TIME_MS = 5000; // 5 seconds
+
+        function handlePlayClick() {
+            // 1. Hide the button and show the spinner
+            playButton.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+
+            // 2. Start the loading sequence
             setTimeout(() => {
+                // 3. Navigate to the home screen after the delay
                 showScreen('home-screen');
-            }, 3000); // Display splash screen for 3 seconds
-        });
+                // 4. Reset spinner for future use (though typically splash screen isn't revisited)
+                loadingSpinner.style.display = 'none';
+                playButton.style.display = 'block'; 
+            }, LOADING_TIME_MS);
+        }
 
         // --- FIREBASE CONFIGURATION (Unchanged) --- 
         const firebaseConfig = { 
@@ -423,7 +450,7 @@
         let aiDifficulty = 'easy'; 
         let localPlayer = null; 
         let roomId = null; 
-        let currentScreen = 'splash-screen'; // Start at splash screen
+        let currentScreen = 'splash-screen'; 
         
         // --- Timer State Variables ---
         let timerInterval = null; 
@@ -432,7 +459,7 @@
         const TIMER_START_SECONDS = 5;
         let autoResetTimeout = null;
         
-        // --- DOM Elements ---
+        // --- DOM Elements (Updated to include new elements) ---
         const gameDiv = document.getElementById('game'); 
         const aiControlsDiv = document.getElementById('aiControls'); 
         const scoreX = document.getElementById('scoreX'); 
@@ -450,6 +477,7 @@
         const chatMessages = document.getElementById('chat-messages'); 
         const chatInput = document.getElementById('chatInput'); 
         const timerDisplay = document.getElementById('timer'); 
+        const timerValueSpan = document.getElementById('timerValue'); 
         const backBtn = document.getElementById('backBtn');
         const chatOpenBtn = document.getElementById('chatOpenBtn');
         const lobbyBoardSizeSpan = document.getElementById('lobbyBoardSize');
@@ -458,7 +486,7 @@
         const chatOverlay = document.getElementById('chat-overlay');
 
 
-        // --- SCREEN MANAGEMENT ---
+        // --- SCREEN MANAGEMENT (Updated initial call) ---
         
         function showScreen(screenId, isGameStart = false) {
             // Hide all full-page screens
@@ -507,14 +535,13 @@
             }
         }
         
-        // --- Chat Overlay Toggle (New Function) ---
         function toggleChatOverlay() {
             chatOverlay.classList.toggle('visible');
         }
 
         function handleBack(isUserInitiated = false) {
             if (chatOverlay.classList.contains('visible')) {
-                toggleChatOverlay(); // Close chat first
+                toggleChatOverlay(); 
                 return;
             }
             
@@ -538,10 +565,7 @@
             mode = 'local'; 
         }
         
-        // --- Game/Score/Timer/AI Logic (Unchanged from previous robust version) ---
-        // (Functions: handleTimeLimitReached, startTimer, stopTimer, resetLocalTimer, getWinLength, setBoardSize, drawBoard, handleClick, checkWinner, updateLocalScore, updateOnlineScoreboard, resetGame, setActiveButton, startGame, sendChatMessage, syncChat, generateRoomId, createGame, joinGame, syncGame, handleOnlineMove, scores, getEmptyIndices, minimax, getBestMove, aiMove, toggleMute)
-        // ... [Pasting all the other unchanged functions here is omitted for brevity but they are included in the final code block above] ...
-        
+        // --- Timer Logic (Unchanged) ---
         function handleTimeLimitReached() {
             if (!gameActive) { stopTimer(); return; }
             const nextPlayer = currentPlayer === 'X' ? 'O' : 'X';
@@ -577,9 +601,9 @@
                     timerValueSpan.textContent = `${elapsedSec}s`;
                     timerValueSpan.classList.remove('timer-warning', 'timer-critical');
                     if (elapsedSec >= 25) {
-                        timerDisplay.style.color = '#f05a7f'; /* Critical */
+                        timerDisplay.style.color = '#f05a7f'; 
                     } else if (elapsedSec >= 15) {
-                        timerDisplay.style.color = '#ff8e3c'; /* Warning */
+                        timerDisplay.style.color = '#ff8e3c'; 
                     }
                 } else {
                     timerDisplay.style.display = 'none';
@@ -603,6 +627,7 @@
             }
         }
         
+        // --- Core Game Logic Functions (Unchanged) ---
         function getWinLength(size) {
             return size;
         }
@@ -1120,9 +1145,8 @@
             const padding = 40; 
             const chatInputArea = document.querySelector('#chat-overlay #chat-input-area');
             if (chatInputArea) {
-                // Ensure chat input width adjusts to the overlay width
                 const overlayWidth = Math.min(window.innerWidth * 0.8, 350);
-                chatInputArea.style.padding = '10px 20px 20px 20px'; // Reset padding
+                chatInputArea.style.padding = '10px 20px 20px 20px'; 
             }
         }
 
@@ -1135,7 +1159,7 @@
             }, 250); 
         });
         window.addEventListener('orientationchange', setAppHeight);
-        setAppHeight(); // Run on load
+        setAppHeight(); 
         
     </script>
 </body>
