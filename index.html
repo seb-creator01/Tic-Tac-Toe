@@ -571,7 +571,8 @@
             if (!isMuted && audioElem.paused) {
                 audioElem.volume = volume;
                 audioElem.currentTime = 0; 
-                audioElem.play().catch(e => console.log("Audio play prevented/blocked:", e));
+                // CRITICAL: .play() needs to be called within a user gesture handler.
+                audioElem.play().catch(e => console.warn("Audio play prevented/blocked (playMusic):", e));
             }
         }
         
@@ -592,7 +593,7 @@
              sfx.play().then(() => {
                 sfx.onended = () => sfx.remove(); // Clean up memory
              }).catch(e => {
-                 console.log("SFX Play Blocked (Dynamic Creation)", e);
+                 console.warn("SFX Play Blocked (Dynamic Creation):", e);
                  // Fallback: If blocked, try to remove immediately
                  sfx.remove();
              });
@@ -626,7 +627,8 @@
             if (playButton) playButton.style.display = 'none';
             if (loadingSpinner) loadingSpinner.style.display = 'block';
             
-            // Initial music start (menuMusic will start) - This fulfils the user interaction required for audio
+            // CRITICAL STEP: Directly call play on the menu music here. This is the 
+            // only guaranteed user gesture, and it enables the entire AudioContext.
             playMusic(menuMusic, 0.3);
 
             // 2. Start the loading sequence
@@ -1326,6 +1328,10 @@
             // If unmuting, ensure the correct track starts playing
             if (!isMuted) {
                 manageMusic(currentScreen);
+            } else {
+                // Stop music immediately when muting
+                stopMusic(menuMusic);
+                stopMusic(gameMusic);
             }
             
             document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊'; 
