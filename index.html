@@ -99,11 +99,34 @@
             position: relative; 
         }
         
+        /* NEW CORRECTED POSITIONING FOR GAME SCREEN ELEMENTS */
+        
+        /* Specific positioning for game status, names, and scoreboard */
+        #game-info {
+            position: absolute;
+            top: 100px; /* NEW: Moved down to clear the title/Back button */
+            width: 95%;
+            max-width: 450px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+
+        #player-names-display {
+            position: absolute;
+            top: 150px; /* NEW: Moved down to clear the game status */
+            width: 95%;
+            max-width: 450px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        
         #game-board-container {
-            /* NEW: Absolute positioning to guarantee space */
+            /* NEW: Absolute positioning with tighter constraints */
             position: absolute; 
-            top: 180px; /* Push down past the title and player names */
-            bottom: 180px; /* Push up past the scoreboard/footer */
+            top: 200px;    /* Moved down (past Game Status and Player Names) */
+            bottom: 150px; /* Moved up (past Scoreboard) */
             left: 50%;
             transform: translateX(-50%);
             
@@ -111,13 +134,23 @@
             width: 100%; 
             max-width: 450px; 
             
-            /* Force the inner board to fill the available space */
+            /* The core container needs to force its aspect ratio/width constraint */
             display: flex; 
             justify-content: center;
             align-items: center; 
             overflow: hidden; 
         }
 
+        #scoreboard {
+            position: absolute;
+            bottom: 60px; /* This position is correct (above the footer) */
+            width: 95%;
+            max-width: 450px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        
         /* --- END CRITICAL RENDER FIX --- */
 
         /* --- SPLASH SCREEN SPECIFIC --- */
@@ -258,7 +291,6 @@
             
             width: 95%; 
             max-width: 450px;
-            /* margin: 20px auto 0 auto; <--- REMOVED due to absolute positioning */
         } 
         
         .cell { 
@@ -308,37 +340,6 @@
             display: inline-block;
             box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
             min-width: 150px;
-        }
-        
-        /* Specific positioning for game status, names, and scoreboard */
-        #game-info {
-            position: absolute;
-            top: 60px; /* Position below title/back button */
-            width: 95%;
-            max-width: 450px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
-        
-        #scoreboard {
-            position: absolute;
-            bottom: 60px; /* Position above footer */
-            width: 95%;
-            max-width: 450px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-        }
-        
-        #player-names-display {
-            position: absolute;
-            top: 100px;
-            width: 95%;
-            max-width: 450px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
         }
         
         #post-game-actions {
@@ -1354,7 +1355,7 @@
                 if (currentScreen === 'online-lobby' && gameState.playerO && localPlayer === 'X') {
                     document.getElementById('onlineStatus').innerHTML = `Opponent (${playerNames['O']}) has joined! Click 'Go to Game'.`;
                 }
-            }); 
+            });
         } 
         
         function handleOnlineMove(index) { 
@@ -1494,7 +1495,6 @@
         } 
         
         // --- JAVASCRIPT FIX FOR MOBILE VH SCROLLING (ENTIRELY REMOVED) ---
-        // Removed setAppHeight() and associated event listeners.
         
         document.addEventListener('DOMContentLoaded', () => {
              setBoardSize(3, document.getElementById('size3x3Btn'), false, 'local-config');
