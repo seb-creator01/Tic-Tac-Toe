@@ -231,12 +231,12 @@
 
         /* --- GAME BOARD --- */
         #game { 
+            /* IMPORTANT: Removed display: grid; from here. It is now set in drawBoard() via JS. */
             grid-gap: 8px; 
             padding: 10px;
             background: var(--color-panel-bg); 
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
-            display: grid;
             grid-template-columns: repeat(var(--board-size), 1fr);
             width: 95%; 
             max-width: 450px;
@@ -549,9 +549,10 @@
             
             <div id="game-info">
                 <p id="gameStatus">Game in progress...</p>
-                <p id="timer">Turn Time: <span id="timerValue">30s</span></p> <div id="game-board-container">
+                <p id="timer">Turn Time: <span id="timerValue">30s</span></p> 
+                <div id="game-board-container">
                     <div id="game">
-                        </div>
+                    </div>
                 </div>
             </div>
             
@@ -787,7 +788,7 @@
             }, LOADING_TIME_MS);
         }
 
-        // --- SCREEN MANAGEMENT ---
+        // --- SCREEN MANAGEMENT (UPDATED FOR CHROME LAYOUT FIX) ---
         
         function showScreen(screenId, isGameStart = false) {
             document.querySelectorAll('.screen').forEach(screen => {
@@ -814,7 +815,7 @@
             // --- MUSIC MANAGEMENT ---
             manageMusic(screenId);
             
-            // Special handling for screen transitions
+            // Special handling for game screen transition
             if (screenId === 'game-screen' && isGameStart) {
                 if (mode === 'local' || mode === 'ai') {
                     
@@ -827,21 +828,24 @@
                     updatePlayerNamesDisplay();
                     gameTitle.textContent = mode === 'local' ? 'LOCAL FRIEND GAME' : `AI GAME (${aiDifficulty.toUpperCase()})`;
                     
-                    // --- STRONGER CRITICAL FIX WITH DELAY AND RECALCULATION ---
-                    // Delay the board sizing and reset to ensure the browser has finished
-                    // rendering the new 'game-screen' dimensions.
+                    // --- CRITICAL FIX: DOUBLE DELAY AND FORCED LAYOUT ---
+                    // This handles the persistent issue in Chrome where the container size is not ready
+                    // when setBoardSize() runs.
                     setTimeout(() => {
-                        
-                        // CRITICAL: Force a synchronous layout recalculation in Chrome
-                        // by reading an offset property on the game board container.
+                        // Step 1: Force synchronous layout recalculation in Chrome
                         const container = document.getElementById('game-board-container');
                         if (container) {
-                            void container.offsetHeight; // Forces layout recalculation
+                            // Reading offsetHeight forces the browser to calculate the layout immediately
+                            void container.offsetHeight; 
                         }
                         
-                        setBoardSize(boardSize, null, true, currentScreen); 
-                        resetGame();
-                    }, 50); // Small 50ms delay
+                        // Step 2: Use a second delay to ensure the container dimensions are stable
+                        setTimeout(() => {
+                            setBoardSize(boardSize, null, true, currentScreen); 
+                            resetGame();
+                        }, 50); // Second 50ms delay
+                        
+                    }, 10); // Initial 10ms delay to allow screen.classList.add('active') to apply
                     // ----------------------------------------
                     
                 } else if (mode === 'online' && localPlayer) {
@@ -994,7 +998,9 @@
             gameDiv.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
             
             let cellSize, fontSize;
+            // The constraint of 500px or 95% of screen width keeps the board centered and square.
             const containerWidth = Math.min(window.innerWidth * 0.95, 500); 
+            // Calculated cell size based on container width and board size, compensating for grid gap (8px).
             cellSize = (containerWidth / size) - (size === 3 ? 5 : 4); 
             fontSize = cellSize / 2.5; 
             
@@ -1045,6 +1051,9 @@
         
         function drawBoard() { 
             gameDiv.innerHTML = ''; 
+            // CRITICAL FIX: Re-enable grid display here after the screen is active
+            gameDiv.style.display = 'grid'; 
+
             const finalResult = !gameActive ? checkWinner(board, false) : {};
             
             board.forEach((val, i) => { 
