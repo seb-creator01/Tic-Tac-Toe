@@ -32,10 +32,10 @@
             --color-cell-hover: #cfcfcf;
         }
 
-        /* --- CRITICAL LAYOUT & FONT --- */
+        /* --- CRITICAL LAYOUT & FONT (VH HACK REMOVED) --- */
         html, body {
             height: 100%;
-            height: calc(var(--vh, 1vh) * 100); 
+            /* height: calc(var(--vh, 1vh) * 100); <--- REMOVED */
             margin: 0; 
             padding: 0; 
             overflow: hidden; 
@@ -47,14 +47,14 @@
             flex-direction: column;
             align-items: center;
             user-select: none;
-            transition: background 0.3s, color 0.3s; /* Smooth theme transition */
+            transition: background 0.3s, color 0.3s; 
         } 
 
         /* --- UI AESTHETICS --- */
         h1, h2, h3 { 
             font-weight: 900;
             color: var(--color-primary-accent); 
-            text-shadow: 0 0 8px rgba(0, 191, 255, 0.5); /* Blue Neon Glow */
+            text-shadow: 0 0 8px rgba(0, 191, 255, 0.5); 
             margin-top: 10px;
         } 
         h1 { font-size: 2.5rem; }
@@ -62,23 +62,23 @@
         .screen {
             width: 100%;
             height: 100%;
-            height: calc(var(--vh, 1vh) * 100); 
+            /* height: calc(var(--vh, 1vh) * 100); <--- REMOVED */
             max-width: 600px;
             position: absolute;
             top: 0;
             left: 50%;
             transform: translateX(-50%);
-            display: none; /* Hidden by default */
+            display: none; 
             padding: 20px;
             box-sizing: border-box;
             background: var(--color-dark-bg); 
             flex-direction: column;
             animation: fadeIn 0.3s ease-in-out;
-            z-index: 100; /* Standard screen layer */
+            z-index: 100; 
         }
         
         .screen.active { 
-            display: flex; /* Shown when active */
+            display: flex; 
         }
 
         @keyframes fadeIn {
@@ -86,37 +86,44 @@
             to { opacity: 1; }
         }
 
-        /* --- CRITICAL RENDER FIX FOR CHROME MOBILE (UPDATED) --- */
+        /* --- CRITICAL RENDER FIX: ABSOLUTE POSITIONING --- */
         .screen-content {
-            flex-grow: 1; 
-            padding: 0; /* Set to 0 here, and handle padding inside the screens */
+            padding: 0; 
             box-sizing: border-box;
-            /* Force the content area to manage vertical space correctly */
             display: flex;
             flex-direction: column;
             align-items: center; 
             height: 100%; /* Important: Take full height */
-            overflow-y: auto; /* Allow scroll if content is too tall */
+            overflow-y: auto; 
+            /* NEW: Establish positioning context for absolute children */
+            position: relative; 
         }
         
         #game-board-container {
-            /* Force the container to take necessary space and contain its children */
-            flex-grow: 1; /* Allow it to take up available vertical space */
-            flex-shrink: 0; /* Prevent it from shrinking */
-            width: 100%; /* Match parent width */
-            max-width: 450px; /* Keep max-width constraint */
-            display: flex; /* Make it a flex container */
-            justify-content: center; /* Center the game board */
-            align-items: center; /* Center the game board vertically */
-            /* THIS IS THE CRITICAL HACK: Forces layout calculation and prevents collapse */
+            /* NEW: Absolute positioning to guarantee space */
+            position: absolute; 
+            top: 180px; /* Push down past the title and player names */
+            bottom: 180px; /* Push up past the scoreboard/footer */
+            left: 50%;
+            transform: translateX(-50%);
+            
+            /* NEW: Constrain the box for the game */
+            width: 100%; 
+            max-width: 450px; 
+            
+            /* Force the inner board to fill the available space */
+            display: flex; 
+            justify-content: center;
+            align-items: center; 
             overflow: hidden; 
         }
+
         /* --- END CRITICAL RENDER FIX --- */
 
         /* --- SPLASH SCREEN SPECIFIC --- */
         #splash-screen {
-            z-index: 200; /* Highest z-index to ensure initial visibility */
-            display: flex; /* Overriding 'display: none' for initial view */
+            z-index: 200; 
+            display: flex; 
             justify-content: center;
             align-items: center;
             flex-direction: column;
@@ -128,35 +135,21 @@
             letter-spacing: 5px;
         }
         #splash-screen p {
-            color: var(--color-text-light); /* Improved visibility */
+            color: var(--color-text-light); 
             font-size: 1.2rem;
             margin: 5px;
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
         }
         
-        /* --- TAGLINE VISIBILITY ENHANCEMENT --- */
-        #tagline {
-            font-size: 1.5rem; 
-            font-weight: 900; 
-            font-style: italic;
-            color: var(--color-secondary-accent);
-            text-shadow: 0 0 10px rgba(57, 255, 20, 1); 
-            margin-top: 20px;
-            margin-bottom: 30px; 
-        }
-        
         /* Play Button Style */
         #play-button {
             background: var(--color-primary-accent); 
-            color: var(--color-text-dark); /* Ensure dark text on bright button */
+            color: var(--color-text-dark); 
             font-size: 1.5rem;
             padding: 15px 50px;
             border-radius: 50px;
             box-shadow: 0 0 15px rgba(0, 191, 255, 0.8), 0 6px 10px rgba(0, 0, 0, 0.5);
             transition: transform 0.1s, opacity 0.3s;
-        }
-        #play-button:hover {
-            background: #4de6ff; 
         }
         #play-button:active {
             transform: scale(0.95);
@@ -184,7 +177,7 @@
             padding: 14px 30px; 
             margin: 8px; 
             border: none; 
-            background: var(--color-cell-bg); /* Use theme variable */
+            background: var(--color-cell-bg); 
             color: var(--color-text-light); 
             font-weight: 700; 
             border-radius: 10px; 
@@ -203,7 +196,7 @@
             color: var(--color-secondary-accent);
             box-shadow: 0 0 15px rgba(57, 255, 20, 0.6), inset 0 0 8px rgba(57, 255, 20, 0.4); 
             transition: all 0.3s ease-in-out;
-            margin: 12px 8px; /* Slightly more vertical margin */
+            margin: 12px 8px; 
         }
         .neon-button:hover {
             background: rgba(57, 255, 20, 0.1); 
@@ -214,7 +207,7 @@
         
         button.active { 
             background: var(--color-secondary-accent); 
-            color: var(--color-text-dark); /* Ensure dark text on bright button */
+            color: var(--color-text-dark); 
             box-shadow: 0 0 10px rgba(57, 255, 20, 0.8), 0 4px 8px rgba(0, 0, 0, 0.5); 
             transform: translateY(-2px); 
         } 
@@ -223,7 +216,7 @@
             padding: 12px;
             border: none;
             border-radius: 25px;
-            background: var(--color-cell-bg); /* Use theme variable */
+            background: var(--color-cell-bg); 
             color: var(--color-text-light);
             font-size: 1rem;
             text-align: center;
@@ -249,11 +242,13 @@
         #backBtn { left: 10px; display: none; }
         #chatOpenBtn { right: 100px; display: none; } 
 
-        /* --- GAME BOARD (STATIC GRID DEFINITION - CRITICAL FIX) --- */
+        /* --- GAME BOARD (STATIC GRID DEFINITION) --- */
         #game { 
-            /* 1. Static Grid Definition to prevent race conditions on mobile */
             display: grid; 
             grid-template-columns: repeat(var(--board-size), 1fr);
+            
+            /* CRITICAL FIX: Ensure the inner grid fills its absolute parent */
+            height: 100%; 
             
             grid-gap: 8px; 
             padding: 10px;
@@ -263,9 +258,8 @@
             
             width: 95%; 
             max-width: 450px;
-            margin: 20px auto 0 auto; 
+            /* margin: 20px auto 0 auto; <--- REMOVED due to absolute positioning */
         } 
-        /* --- END STATIC GRID DEFINITION --- */
         
         .cell { 
             aspect-ratio: 1 / 1; 
@@ -275,7 +269,7 @@
             font-size: var(--font-size, 3rem); 
             font-weight: 900;
             cursor: pointer;
-            background: var(--color-cell-bg); /* Themed background */
+            background: var(--color-cell-bg); 
             color: var(--color-text-light); 
             border-radius: 5px;
             transition: background 0.2s, color 0.2s;
@@ -284,7 +278,7 @@
         .cell.winner { 
             background: var(--color-secondary-accent); 
             box-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
-            color: var(--color-text-dark); /* Ensure contrast */
+            color: var(--color-text-dark); 
             animation: pulseWin 0.5s infinite alternate;
         } 
         
@@ -304,7 +298,7 @@
             font-weight: 700;
         }
         
-        /* Scoreboard Panel */
+        /* Scoreboard Panel (Positioned at the bottom) */
         .scoreboard-panel {
             background: var(--color-panel-bg);
             border: 1px solid var(--color-primary-accent);
@@ -315,15 +309,47 @@
             box-shadow: 0 0 10px rgba(0, 191, 255, 0.3);
             min-width: 150px;
         }
-        .scoreboard-panel h2 {
-             font-size: 1.1rem;
-             margin-top: 0;
-        }
-        .scoreboard-panel p {
-            margin: 5px 0;
-            font-size: 0.9rem;
+        
+        /* Specific positioning for game status, names, and scoreboard */
+        #game-info {
+            position: absolute;
+            top: 60px; /* Position below title/back button */
+            width: 95%;
+            max-width: 450px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
         }
         
+        #scoreboard {
+            position: absolute;
+            bottom: 60px; /* Position above footer */
+            width: 95%;
+            max-width: 450px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        
+        #player-names-display {
+            position: absolute;
+            top: 100px;
+            width: 95%;
+            max-width: 450px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        
+        #post-game-actions {
+             position: absolute;
+             bottom: 120px;
+             left: 50%;
+             transform: translateX(-50%);
+             z-index: 20;
+             margin: 0;
+        }
+
         /* --- CHAT OVERLAY --- */
         #chat-overlay {
             position: fixed;
@@ -331,7 +357,7 @@
             right: 0;
             width: 80%;
             max-width: 350px;
-            height: calc(var(--vh, 1vh) * 100);
+            height: 100%;
             background: rgba(15, 15, 15, 0.95); 
             box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
             transform: translateX(100%); 
@@ -347,73 +373,6 @@
             transform: translateX(0); 
         }
         
-        #chat-overlay h2 {
-            margin-bottom: 5px;
-            padding: 0 20px;
-            flex-shrink: 0;
-            color: var(--color-secondary-accent);
-        }
-        #chat-messages {
-            overflow-y: auto;
-            flex-grow: 1;
-            padding: 10px 20px;
-        }
-        #chat-messages p {
-            margin: 5px 0;
-            font-size: 0.95rem;
-        }
-        .chat-message-x { color: var(--color-primary-accent); } 
-        .chat-message-o { color: var(--color-secondary-accent); } 
-        .chat-message-system { color: #aaaaaa; font-style: italic; }
-
-        #chat-input-area {
-            display: flex;
-            flex-direction: column; /* Stack input and reactions */
-            padding: 10px 20px 20px 20px;
-            background: rgba(0, 0, 0, 0.7);
-            flex-shrink: 0;
-        }
-        
-        /* Reaction Emojis Style */
-        #reaction-emojis {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 10px;
-        }
-        #reaction-emojis button {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            padding: 5px;
-            margin: 0 5px;
-            box-shadow: none;
-            transition: transform 0.1s;
-        }
-        #reaction-emojis button:hover {
-            transform: scale(1.1);
-        }
-        
-        /* Chat text input and send button */
-        #text-input-group {
-            display: flex;
-        }
-        #chat-input-area input {
-            flex-grow: 1;
-            border-radius: 25px 0 0 25px;
-            padding: 12px 18px;
-            text-align: left;
-            margin: 0;
-        }
-        #chat-input-area button.send-btn {
-            padding: 10px 15px;
-            background: var(--color-primary-accent);
-            color: var(--color-text-dark);
-            border-radius: 0 25px 25px 0;
-            margin: 0;
-            box-shadow: none;
-            flex-shrink: 0;
-        }
-
         /* Footer */
         footer { 
             position: fixed;
@@ -444,11 +403,6 @@
         #online-lobby-status p {
             font-style: italic;
             color: var(--color-primary-accent);
-        }
-        
-        /* Post Game Buttons */
-        #post-game-actions {
-            margin-top: 20px;
         }
     </style>
 </head>
@@ -565,7 +519,9 @@
 
     <div id="game-screen" class="screen">
         <div class="screen-content"> 
-            <h2 id="gameTitle" style="padding-top: 20px;">Local Game</h2> <div id="player-names-display">
+            <h2 id="gameTitle" style="padding-top: 20px;">Local Game</h2> 
+            
+            <div id="player-names-display">
                 <p id="nameX" style="color: var(--color-primary-accent); display: inline-block; margin-right: 20px;">X: Player X</p>
                 <p id="nameO" style="color: var(--color-secondary-accent); display: inline-block;">O: Player O</p>
             </div>
@@ -573,9 +529,10 @@
             <div id="game-info">
                 <p id="gameStatus">Game in progress...</p>
                 <p id="timer">Turn Time: <span id="timerValue">30s</span></p> 
-                <div id="game-board-container">
-                    <div id="game">
-                    </div>
+            </div>
+            
+            <div id="game-board-container">
+                <div id="game">
                 </div>
             </div>
             
@@ -583,7 +540,8 @@
                 <button id="rematchBtn" class="neon-button" onclick="handleRematch()">REMATCH</button>
             </div>
             
-            <div id="scoreboard" style="margin-bottom: 20px;"> <div id="local-scoreboard" class="scoreboard-panel">
+            <div id="scoreboard"> 
+                <div id="local-scoreboard" class="scoreboard-panel">
                     <h2>LOCAL SCORE</h2>
                     <p><span id="nameScoreX">Player X</span>: <span id="scoreX">0</span></p>
                     <p><span id="nameScoreO">Player O</span>: <span id="scoreO">0</span></p>
@@ -633,7 +591,7 @@
     <script>
         
         // --- NEW SPLASH SCREEN HANDLER ---
-        const LOADING_TIME_MS = 1000; // Reduced for testing/UX
+        const LOADING_TIME_MS = 1000; 
 
         // Fetching elements early
         const appBody = document.getElementById('app-body');
@@ -676,7 +634,7 @@
         let isMuted = false; 
         let mode = 'local'; 
         let gameActive = true; 
-        let aiDifficulty = 'hard'; // Default to hard for better UX
+        let aiDifficulty = 'hard'; 
         let localPlayer = null; 
         let roomId = null; 
         let currentScreen = 'splash-screen'; 
@@ -690,8 +648,8 @@
         // --- Timer State Variables ---
         let timerInterval = null; 
         let localMoveStartTime = Date.now();
-        const TIME_LIMIT_SECONDS = 30; // 30s countdown
-        const TIMER_START_SECONDS = 0; // Timer starts immediately
+        const TIME_LIMIT_SECONDS = 30; 
+        const TIMER_START_SECONDS = 0; 
         let autoResetTimeout = null;
         
         // --- DOM Elements ---
@@ -735,7 +693,7 @@
         const nameScoreX = document.getElementById('nameScoreX');
         const nameScoreO = document.getElementById('nameScoreO');
         
-        // --- THEME & MUTE HANDLERS ---
+        // --- THEME & MUTE HANDLERS (Unchanged) ---
         
         function setTheme(theme) {
             if (theme === 'light') {
@@ -760,13 +718,13 @@
         function playSoundEffect(audioElem, volume = 0.8) {
              if (audioElem && !isMuted) {
                 audioElem.volume = volume;
-                audioElem.currentTime = 0; // Rewind to start for instant playback
+                audioElem.currentTime = 0; 
                 audioElem.play().catch(e => console.log("Sound effect play prevented:", e));
             }
         }
 
         function stopMusic(audioElem) {
-            if (audioElem) { // Check if element exists before pausing
+            if (audioElem) { 
                 audioElem.pause();
             }
         }
@@ -784,15 +742,10 @@
             }
         }
         
-        /**
-         * Handles the click on the "PLAY GAME" button, showing the spinner
-         * and waiting for the loading time before transitioning to the home screen.
-         */
         function handlePlayClick() {
             if (playButton) playButton.style.display = 'none';
             if (loadingSpinner) loadingSpinner.style.display = 'block';
             
-            // Initial music start (menuMusic will start)
             playMusic(menuMusic, 0.3);
 
             setTimeout(() => {
@@ -810,7 +763,7 @@
             }, LOADING_TIME_MS);
         }
 
-        // --- SCREEN MANAGEMENT (UPDATED FOR FINAL FIX) ---
+        // --- SCREEN MANAGEMENT (Unchanged) ---
         
         function showScreen(screenId, isGameStart = false) {
             document.querySelectorAll('.screen').forEach(screen => {
@@ -823,25 +776,20 @@
                 currentScreen = screenId;
             }
 
-            // Reset post-game actions when navigating away
             postGameActionsDiv.style.display = 'none';
 
-            // Manage fixed buttons (Back, Chat)
             backBtn.style.display = (screenId === 'home-screen' || screenId === 'splash-screen') ? 'none' : 'block';
             
             chatOpenBtn.style.display = (screenId === 'game-screen' && mode === 'online' && localPlayer) ? 'block' : 'none';
             if (screenId !== 'game-screen') {
-                chatOverlay.classList.remove('visible'); // Hide chat when leaving game screen
+                chatOverlay.classList.remove('visible'); 
             }
             
-            // --- MUSIC MANAGEMENT ---
             manageMusic(screenId);
             
-            // Special handling for game screen transition
             if (screenId === 'game-screen' && isGameStart) {
                 if (mode === 'local' || mode === 'ai') {
                     
-                    // Set player names and title immediately
                     playerNames['X'] = document.getElementById(mode === 'local' ? 'playerNameX' : 'playerNameAIAI').value || 'Player X';
                     playerNames['O'] = document.getElementById(mode === 'local' ? 'playerNameO' : 'AI Bot').value || 'Player O';
                     
@@ -850,10 +798,8 @@
                     updatePlayerNamesDisplay();
                     gameTitle.textContent = mode === 'local' ? 'LOCAL FRIEND GAME' : `AI GAME (${aiDifficulty.toUpperCase()})`;
                     
-                    // NEW SIMPLIFIED LOGIC: CSS handles the layout, we just apply the size and reset.
                     setBoardSize(boardSize, null, true, currentScreen); 
                     resetGame();
-                    // ----------------------------------------
                     
                 } else if (mode === 'online' && localPlayer) {
                     gameTitle.textContent = `ONLINE GAME (${playerNames[localPlayer]})`;
@@ -869,7 +815,7 @@
             } else if (screenId === 'ai-config') {
                  mode = 'ai';
                  setBoardSize(3, document.getElementById('aiSize3x3Btn'), false, 'ai-config');
-                 startGame('ai', 'hard', document.querySelector('#aiDifficultyControls button:last-child')); // Default hard
+                 startGame('ai', 'hard', document.querySelector('#aiDifficultyControls button:last-child')); 
             } else if (screenId === 'online-lobby') {
                  mode = 'online';
                  document.getElementById('onlinePlayerName').disabled = false;
@@ -919,14 +865,13 @@
             mode = 'local'; 
         }
         
-        // NEW: Handles the rematch button click
         function handleRematch() {
             if (mode === 'local' || mode === 'ai') {
                 resetGame();
             }
         }
         
-        // --- Timer Logic (FIXED: Countdown) ---
+        // --- Timer Logic (Unchanged) ---
         function handleTimeLimitReached() {
             if (!gameActive) { stopTimer(); return; }
             const nextPlayer = currentPlayer === 'X' ? 'O' : 'X';
@@ -966,9 +911,9 @@
                 timerValueSpan.style.color = 'var(--color-text-light)';
                 
                 if (remainingSec <= 5) {
-                    timerValueSpan.style.color = '#f05a7f'; // Critical Red
+                    timerValueSpan.style.color = '#f05a7f'; 
                 } else if (remainingSec <= 15) {
-                    timerValueSpan.style.color = '#ff8e3c'; // Warning Orange
+                    timerValueSpan.style.color = '#ff8e3c'; 
                 }
             }, 1000);
         }
@@ -1002,14 +947,13 @@
                 board = Array(newBoardLength).fill('');
             }
             
-            // The grid template columns is now set in static CSS using the variable
             gameDiv.style.setProperty('--board-size', size);
             
             let cellSize, fontSize;
-            // The constraint of 500px or 95% of screen width keeps the board centered and square.
-            const containerWidth = Math.min(window.innerWidth * 0.95, 500); 
+            // The board container width is constrained to 450px max width.
+            const containerWidth = Math.min(window.innerWidth * 0.95, 450); 
             // Calculated cell size based on container width and board size, compensating for grid gap (8px).
-            // A small adjustment to the calculation for visual precision on mobile
+            // This calculation is now more robust as the container size is guaranteed.
             cellSize = (containerWidth / size) - (size === 3 ? 5 : 4); 
             fontSize = cellSize / 2.5; 
             
@@ -1019,7 +963,6 @@
             // --- UI/Button Activation Logic ---
             const sizeControlsId = location === 'local-config' ? 'boardSizeControls' : (location === 'ai-config' ? 'aiBoardSizeControls' : 'onlineBoardSizeControls');
             
-            // Deactivate all in current location
             document.querySelectorAll(`#${sizeControlsId} button`).forEach(btn => { 
                 btn.classList.remove('active'); 
             }); 
@@ -1027,18 +970,14 @@
                 button.classList.add('active'); 
             }
             
-            // Sync board size displays
             if (location === 'online-lobby') {
                 lobbyBoardSizeSpan.textContent = `${size}x${size}`;
             }
 
-            // AI Controls visibility logic only relevant on local-config/ai-config
             if (location === 'local-config' && size !== 3) {
-                 // Deactivate AI button if active and size > 3
                  setActiveButton('aiControls', null);
             }
             
-            // --- Game Reset/Online Logic (SKIPPED if skipReset is TRUE) ---
             if (skipReset) {
                 drawBoard(); 
                 return;
@@ -1059,17 +998,15 @@
         
         function drawBoard() { 
             gameDiv.innerHTML = ''; 
-            // REMOVED: gameDiv.style.display = 'grid'; // Grid display is now static in CSS
 
             const finalResult = !gameActive ? checkWinner(board, false) : {};
             
             board.forEach((val, i) => { 
                 const cell = document.createElement('div'); 
                 cell.className = 'cell'; 
-                cell.innerHTML = val ? `<strong>${val}</strong>` : ''; // Use strong for better visibility
+                cell.innerHTML = val ? `<strong>${val}</strong>` : ''; 
                 cell.setAttribute('data-index', i); 
                 
-                // NEW: Apply winning class
                 if (!gameActive && finalResult.winningIndices && finalResult.winningIndices.includes(i)) { 
                     cell.classList.add('winner'); 
                 } 
@@ -1079,7 +1016,7 @@
             
             if (currentScreen === 'game-screen') {
                  postGameActionsDiv.style.display = gameActive ? 'none' : 'block';
-                 if (mode === 'online') postGameActionsDiv.style.display = 'none'; // No rematch in online
+                 if (mode === 'online') postGameActionsDiv.style.display = 'none'; 
 
                 if (mode === 'online' && localPlayer) { 
                     if (!gameActive) { 
@@ -1125,7 +1062,6 @@
                     if(result.winner === 'Draw') playSoundEffect(drawSound);
                     else playSoundEffect(winSound);
                     drawBoard();
-                    // Rematch button is shown by drawBoard -> postGameActionsDiv
                 } else {
                     currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; 
                     drawBoard(); 
@@ -1139,7 +1075,6 @@
 
         function checkWinner(currentBoard, updateGlobalState = false) {
             const size = boardSize;
-            // The N-in-a-row rule: 3x3 must be 3; 4x4 must be 4; 5x5 must be 5.
             const N = size; 
 
             const index = (r, c) => r * size + c;
@@ -1238,7 +1173,6 @@
             scoreDraws.textContent = '0'; 
         } 
         
-        // NEW: isReaction parameter
         function sendChatMessage(messageOrReaction, isReaction = false) {
             if (!db || !roomId || !localPlayer) return;
 
@@ -1374,7 +1308,6 @@
                 if (!snapshot.exists()) return; 
                 const gameState = snapshot.val(); 
                 
-                // Update player names immediately
                 playerNames['X'] = gameState.playerXName || 'Player X';
                 playerNames['O'] = gameState.playerOName || 'Waiting...';
                 
@@ -1387,7 +1320,6 @@
                 currentPlayer = gameState.currentPlayer; 
                 gameActive = gameState.gameActive; 
                 
-                // Timer Logic
                 if (gameState.lastMoveTime && gameActive && localPlayer === currentPlayer) {
                     startTimer(gameState.lastMoveTime);
                 } else {
@@ -1399,7 +1331,6 @@
                 } 
                 drawBoard(); 
                 
-                // Auto-reset logic (only X handles this)
                 if (prevGameActive && !gameActive) { 
                     if (autoResetTimeout) clearTimeout(autoResetTimeout);
                     autoResetTimeout = setTimeout(() => { 
@@ -1420,7 +1351,6 @@
                     }, 3000);
                 }
                 
-                // Check if opponent has joined
                 if (currentScreen === 'online-lobby' && gameState.playerO && localPlayer === 'X') {
                     document.getElementById('onlineStatus').innerHTML = `Opponent (${playerNames['O']}) has joined! Click 'Go to Game'.`;
                 }
@@ -1550,14 +1480,12 @@
         function toggleMute() { 
             isMuted = !isMuted; 
             
-            // Apply mute state to all audio elements
             if (menuMusic) menuMusic.muted = isMuted; 
             if (gameMusic) gameMusic.muted = isMuted; 
             if (clickSound) clickSound.muted = isMuted; 
             if (winSound) winSound.muted = isMuted;     
             if (drawSound) drawSound.muted = isMuted;   
             
-            // If unmuting, ensure the correct track starts playing
             if (!isMuted) {
                 manageMusic(currentScreen);
             }
@@ -1565,36 +1493,30 @@
             document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊'; 
         } 
         
-        // --- JAVASCRIPT FIX FOR MOBILE VH SCROLLING ---
-        let resizeTimer; 
-
-        function setAppHeight() {
-            let vh = window.innerHeight * 0.01;
-            document.documentElement.style.setProperty('--vh', `${vh}px`);
-        }
-
-        // --- Initial Setup and Resize Fix ---
-        window.addEventListener('resize', () => {
-            setAppHeight(); 
-            clearTimeout(resizeTimer); 
-            resizeTimer = setTimeout(() => {
-                setBoardSize(boardSize, null, true, currentScreen);
-            }, 250); 
-        });
-        window.addEventListener('orientationchange', setAppHeight);
-        setAppHeight(); 
+        // --- JAVASCRIPT FIX FOR MOBILE VH SCROLLING (ENTIRELY REMOVED) ---
+        // Removed setAppHeight() and associated event listeners.
         
-        // Initial setup for local/AI buttons on first load
         document.addEventListener('DOMContentLoaded', () => {
              setBoardSize(3, document.getElementById('size3x3Btn'), false, 'local-config');
              startGame('local', null, document.getElementById('localPlayBtn'));
              
-             // Default AI setting
              setActiveButton('aiDifficultyControls', document.querySelector('#aiDifficultyControls button:last-child'));
 
-             // Set initial mute state
-             toggleMute(); // Mute by default until user interacts (browser policy)
+             toggleMute(); 
         });
+        
+        // CRITICAL: Force a redraw on resize or orientation change to recalculate cell size
+        window.addEventListener('resize', () => {
+            if (currentScreen === 'game-screen') {
+                 // Delay the recalculation to let the browser settle
+                 setTimeout(() => {
+                    setBoardSize(boardSize, null, true, currentScreen);
+                 }, 100);
+            }
+        });
+        
+        // Final sanity check: set board size on load.
+        setBoardSize(3, null, true, 'splash-screen');
         
     </script>
 </body>
