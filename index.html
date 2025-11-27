@@ -450,13 +450,6 @@
         <p>Developed by <b>Seb-Creations</b> | XOX Arena</p>
     </footer>
 
-    <audio id="menuMusic" loop src="https://cdns.seb-cdn.com/audio/ambient_menu_music.mp3" preload="auto"></audio> 
-    <audio id="gameMusic" loop src="https://cdns.seb-cdn.com/audio/game_loop_music.mp3" preload="auto"></audio> 
-    <audio id="clickSound" src="https://cdns.seb-cdn.com/audio/click_sfx.mp3" preload="auto"></audio>
-    <audio id="winSound" src="https://cdns.seb-cdn.com/audio/win_sfx.mp3" preload="auto"></audio>
-    <audio id="drawSound" src="https://cdns.seb-cdn.com/audio/draw_sfx.mp3" preload="auto"></audio>
-
-
     <script>
         
         // --- NEW SPLASH SCREEN HANDLER ---
@@ -514,20 +507,21 @@
         const TIMER_START_SECONDS = 5;
         let autoResetTimeout = null;
         
-        // --- DOM Elements (Updated to include new elements) ---
+        // --- Audio Variables (UPDATED for dynamic creation) ---
+        let menuMusic = null; 
+        let gameMusic = null; 
+        
+        // Sound Effect URLs (Used for dynamic creation)
+        const CLICK_SFX_URL = "https://cdns.seb-cdn.com/audio/click_sfx.mp3";
+        const WIN_SFX_URL = "https://cdns.seb-cdn.com/audio/win_sfx.mp3";
+        const DRAW_SFX_URL = "https://cdns.seb-cdn.com/audio/draw_sfx.mp3";
+        
+        // --- DOM Elements (Unchanged) ---
         const gameDiv = document.getElementById('game'); 
         const aiControlsDiv = document.getElementById('aiControls'); 
         const scoreX = document.getElementById('scoreX'); 
         const scoreO = document.getElementById('scoreO'); 
         const scoreDraws = document.getElementById('scoreDraws'); 
-        // MUSIC ELEMENTS
-        const menuMusic = document.getElementById('menuMusic'); 
-        const gameMusic = document.getElementById('gameMusic'); 
-        // SOUND EFFECT ELEMENTS (NEW)
-        const clickSound = document.getElementById('clickSound');
-        const winSound = document.getElementById('winSound');
-        const drawSound = document.getElementById('drawSound');
-        // END MUSIC/SOUND ELEMENTS
         const roomIdInput = document.getElementById('roomIdInput'); 
         const gameStatusP = document.getElementById('gameStatus'); 
         const onlineScoreboardDiv = document.getElementById('online-scoreboard'); 
@@ -549,19 +543,22 @@
 
 
         /**
-         * Sets the initial volume and state for all audio elements.
-         * CRITICAL FIX: Forces loading of short sound effects.
+         * Initializes the music elements using the Audio constructor.
+         * This runs once on script load/user interaction.
          */
         function initializeAudioState() {
-            const allAudio = [menuMusic, gameMusic, clickSound, winSound, drawSound];
-            allAudio.forEach(audioElem => {
-                if (audioElem) {
-                    audioElem.volume = 0.4; // Set a default volume
-                    audioElem.muted = isMuted;
-                    // CRITICAL ADDITION: Force the browser to load the data now
-                    audioElem.load(); 
-                }
-            });
+            // Create persistent background music elements
+            menuMusic = new Audio("https://cdns.seb-cdn.com/audio/ambient_menu_music.mp3");
+            menuMusic.loop = true;
+            menuMusic.volume = 0.3;
+            menuMusic.muted = isMuted;
+
+            gameMusic = new Audio("https://cdns.seb-cdn.com/audio/game_loop_music.mp3");
+            gameMusic.loop = true;
+            gameMusic.volume = 0.4;
+            gameMusic.muted = isMuted;
+            
+            // NOTE: SFX elements are NOT created here, but in playSoundEffect.
         }
 
         /**
@@ -579,20 +576,26 @@
         }
         
         /**
-         * Plays a sound effect instantly, checking the mute state.
-         * @param {HTMLAudioElement} audioElem - The sound effect element.
+         * Plays a sound effect instantly by creating a new Audio object.
+         * This aggressively bypasses most browser restrictions.
+         * @param {string} url - The URL of the sound effect.
          * @param {number} volume - Volume (0.0 to 1.0).
          */
-        function playSoundEffect(audioElem, volume = 0.8) {
-             if (!audioElem) return;
+        function playSoundEffect(url, volume = 0.8) {
+             if (isMuted) return;
 
-             if (!isMuted) {
-                audioElem.volume = volume;
-                // CRITICAL FIX: Rewind and reload to ensure the short sound is always ready
-                audioElem.pause();
-                audioElem.currentTime = 0; 
-                audioElem.play().catch(e => console.log("Sound effect play failed:", e));
-            }
+             // CRITICAL FIX: Create a brand new Audio element every time
+             const sfx = new Audio(url);
+             sfx.volume = volume;
+
+             // Attempt to play, and remove the element from memory after it finishes
+             sfx.play().then(() => {
+                sfx.onended = () => sfx.remove(); // Clean up memory
+             }).catch(e => {
+                 console.log("SFX Play Blocked (Dynamic Creation)", e);
+                 // Fallback: If blocked, try to remove immediately
+                 sfx.remove();
+             });
         }
 
         function stopMusic(audioElem) {
@@ -897,8 +900,8 @@
                         const result = checkWinner(board, false);
                         gameStatusP.textContent = `GAME OVER! ${result.winner === 'Draw' ? 'IT\'S A DRAW!' : `<strong>${result.winner}</strong> WINS!`}. Starting new round in 3 seconds...`; 
                         // Sound effect on online win/draw
-                        if(result.winner === 'Draw') playSoundEffect(drawSound);
-                        else playSoundEffect(winSound);
+                        if(result.winner === 'Draw') playSoundEffect(DRAW_SFX_URL);
+                        else playSoundEffect(WIN_SFX_URL);
                         stopTimer(); 
                     } else { 
                         const turnMessage = (currentPlayer === localPlayer) ? 'YOUR TURN!' : `${currentPlayer}'S TURN.`;
@@ -914,7 +917,7 @@
             if (!gameActive || board[index]) return; 
             
             // Play click sound on successful move
-            playSoundEffect(clickSound); 
+            playSoundEffect(CLICK_SFX_URL); 
 
             if (mode === 'online') { 
                 if (currentPlayer !== localPlayer) { 
@@ -929,8 +932,8 @@
                 if (result.winner) {
                     updateLocalScore(result.winner);
                     // Play win/draw sound
-                    if(result.winner === 'Draw') playSoundEffect(drawSound);
-                    else playSoundEffect(winSound);
+                    if(result.winner === 'Draw') playSoundEffect(DRAW_SFX_URL);
+                    else playSoundEffect(WIN_SFX_URL);
                     drawBoard();
                     setTimeout(resetGame, 2000);
                 } else {
@@ -1278,7 +1281,7 @@
             stopTimer(); 
             
             // Play a click sound for the AI move
-            playSoundEffect(clickSound, 0.5); 
+            playSoundEffect(CLICK_SFX_URL, 0.5); 
             
             let empty = getEmptyIndices(board); 
             let move = -1; 
@@ -1301,8 +1304,8 @@
                 if (result.winner) {
                     updateLocalScore(result.winner);
                     // Play win/draw sound
-                    if(result.winner === 'Draw') playSoundEffect(drawSound);
-                    else playSoundEffect(winSound);
+                    if(result.winner === 'Draw') playSoundEffect(DRAW_SFX_URL);
+                    else playSoundEffect(WIN_SFX_URL);
                     drawBoard(); 
                     setTimeout(resetGame, 2000);
                 } else {
@@ -1316,15 +1319,9 @@
         function toggleMute() { 
             isMuted = !isMuted; 
             
-            // Get all audio elements dynamically
-            const allAudio = [menuMusic, gameMusic, clickSound, winSound, drawSound];
-            
-            // Apply mute state to all audio elements (CRITICAL FIX)
-            allAudio.forEach(audioElem => {
-                if (audioElem) {
-                    audioElem.muted = isMuted;
-                }
-            });
+            // Apply mute state to persistent music elements
+            if (menuMusic) menuMusic.muted = isMuted;
+            if (gameMusic) gameMusic.muted = isMuted;
             
             // If unmuting, ensure the correct track starts playing
             if (!isMuted) {
@@ -1360,7 +1357,7 @@
         window.addEventListener('orientationchange', setAppHeight);
         setAppHeight(); 
         
-        // CRITICAL INITIAL CALL: Initialize the volume and mute state for all audio elements
+        // CRITICAL INITIAL CALL: Initialize the persistent music elements
         initializeAudioState(); 
         
     </script>
