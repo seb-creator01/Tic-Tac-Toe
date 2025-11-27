@@ -121,10 +121,10 @@
             margin-bottom: 5px; 
         }
         
+        /* CRITICAL RENDER FIX: BOARD CONTAINER */
         #game-board-container {
-            /* CRITICAL FIX 2: Takes up all remaining vertical space within screen-content */
-            flex-grow: 1; 
-            min-height: 0; /* Prevents overflow when content is too large */
+            /* REMOVED: flex-grow: 1; min-height: 0; */
+            
             width: 100%; 
             max-width: 450px; 
             display: flex; 
@@ -132,8 +132,14 @@
             align-items: center; 
             overflow: hidden; 
             min-width: min(100%, 450px);
-            /* Added margin to help spacing from other elements */
             margin: 5px 0; 
+            
+            /* CRITICAL FIX 4: Explicitly set max height based on viewport 
+               - Subtracting 270px is an estimate for browser chrome, header, footer, and padding.
+               - IF CUT OFF, INCREASE THIS VALUE (e.g., 280px, 290px)
+            */
+            max-height: calc((var(--vh, 1vh) * 100) - 270px); 
+            height: 100%; /* Default to 100% of available space */
         }
 
         /* --- GAME BOARD (DYNAMIC GRID DEFINITION) --- */
@@ -150,6 +156,7 @@
             width: var(--dynamic-board-size); 
             aspect-ratio: 1 / 1; 
             max-width: 450px; 
+            max-height: 100%; /* Ensure it respects the container max-height */
         } 
         
         .cell { 
@@ -572,7 +579,7 @@
         <p>Developed by <b>Seb-Creations</b> | XOX Arena</p>
     </footer>
 
-    <audio id="menuMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-sci-fi-game-intro-2426.mp3" preload="auto"></audio> 
+    <audio id="menuMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-sci-fi-game-intro-2426.mpload="auto"></audio> 
     <audio id="gameMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-cyber-attack-1335.mp3" preload="auto"></audio> 
     
     <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-button-click-1944.mp3" preload="auto"></audio>
@@ -994,40 +1001,29 @@
         }
         
         function calculateAndSetBoardSize() {
-            if (currentScreen !== 'game-screen' || !gameBoardContainer || !gameInfoHeader || !scoreboardDiv) return;
+            if (currentScreen !== 'game-screen' || !gameBoardContainer || !gameDiv) return;
             
-            const contentContainer = document.querySelector('#game-screen .screen-content');
-            if (!contentContainer) return;
-
-            // 1. Get the boundary of the total available space for screen-content (1fr area)
-            const contentRect = contentContainer.getBoundingClientRect();
+            // 1. Get the actual dimensions of the now CSS-constrained container
+            const containerRect = gameBoardContainer.getBoundingClientRect();
             
-            // 2. Calculate the total vertical space consumed by elements *above and below* the board container
-            const headerHeight = gameInfoHeader.offsetHeight || 0;
-            const scoreboardHeight = scoreboardDiv.offsetHeight || 0;
-            const actionsHeight = postGameActionsDiv.offsetHeight || 0;
+            // 2. Determine the available size by taking the minimum of the container's width and height
+            // This guarantees the board will be a square that fits the tightest dimension (usually height on mobile).
+            let availableSize = Math.min(containerRect.width, containerRect.height);
             
-            // Total vertical padding/margin within screen-content
-            // Note: If you add top/bottom padding to .screen-content, add it here. Currently it's 10px top/bottom.
-            const verticalPadding = 20; 
-
-            // Available height for the board container (1fr area)
-            const availableVerticalSpace = contentRect.height - headerHeight - scoreboardHeight - actionsHeight - verticalPadding;
-
-            // 3. Determine the size based on the minimum of available width, available height, and max-width (450px)
-            const availableSize = Math.min(contentRect.width, availableVerticalSpace, 450);
+            // 3. Apply final size constraints 
+            availableSize = Math.min(availableSize, 450); 
             
             // 4. Adjust for board padding (10px on each side = 20px total)
             const boardPadding = 20; 
             let finalBoardSize = availableSize - boardPadding; 
             
-            // 5. Apply final size constraints (safe check)
-            finalBoardSize = Math.min(finalBoardSize, 450); 
-            
-            // 6. Set the CSS variables
+            // 5. Ensure it's not negative
+            finalBoardSize = Math.max(0, finalBoardSize);
+
+            // 6. Set the CSS variables for the game board
             gameDiv.style.setProperty('--dynamic-board-size', `${finalBoardSize}px`);
 
-            // 7. Calculate cell font size
+            // 7. Calculate cell font size based on the final board size
             const size = boardSize;
             const gapSpace = 8 * (size - 1);
             const cellSideLength = (finalBoardSize - gapSpace) / size;
