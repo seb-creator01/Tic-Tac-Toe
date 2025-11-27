@@ -84,52 +84,38 @@
             to { opacity: 1; }
         }
 
-        /* --- CRITICAL RENDER FIX: ABSOLUTE POSITIONING --- */
+        /* --- CRITICAL RENDER FIX: FLEXBOX LAYOUT --- */
         .screen-content {
             padding: 0; 
             box-sizing: border-box;
+            
+            /* KEY CHANGE: Use flex column to stack elements naturally */
             display: flex;
             flex-direction: column;
             align-items: center; 
+            
             height: 100%; 
-            overflow-y: auto; 
+            overflow-y: hidden; /* Prevent scrolling inside the content box */
             position: relative; 
         }
         
-        /* NEW CORRECTED POSITIONING FOR GAME SCREEN ELEMENTS */
+        /* Positioning for game status, names, and scoreboard */
         
-        /* Player names and game status are now grouped */
-        #game-info,
-        #player-names-display {
-            position: absolute;
+        /* The player names and game info should stack normally */
+        #player-names-display, #game-info {
             width: 95%;
             max-width: 450px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
+            margin-bottom: 5px; /* Add slight space below text info */
         }
 
-        #player-names-display {
-            top: 100px; /* Starts high, below the main title */
-        }
-
-        #game-info {
-            top: 150px; /* Starts below the player names */
-        }
-        
         #game-board-container {
-            /* NEW: Absolute positioning with tighter constraints */
-            position: absolute; 
-            top: 250px;    /* CRITICAL CHANGE: Moved down to clear BOTH Player Names (100px) and Game Info (150px) */
-            bottom: 150px; /* Moved up (past Scoreboard) */
-            left: 50%;
-            transform: translateX(-50%);
+            /* CRITICAL CHANGE: Take up remaining vertical space */
+            flex-grow: 1; 
             
-            /* NEW: Constrain the box for the game */
             width: 100%; 
             max-width: 450px; 
             
-            /* The core container needs to force its aspect ratio/width constraint */
+            /* Center the board within the container */
             display: flex; 
             justify-content: center;
             align-items: center; 
@@ -137,23 +123,27 @@
             
             /* CRITICAL: Force the inner board to fill the available space */
             #game {
-                height: 100%; 
+                /* Ensure the board maintains its aspect ratio within this flex container */
+                width: 100%; 
+                max-width: 450px;
+                height: auto; /* Let the height be determined by the grid content */
             }
         }
 
         #scoreboard {
-            position: absolute;
-            bottom: 60px; /* Positioned above the footer */
+            /* Scoreboard is pushed to the bottom by flex-grow: 1 on the container above */
             width: 95%;
             max-width: 450px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
+            margin-bottom: 60px; /* Space above the footer */
+        }
+        
+        #post-game-actions {
+             margin-top: 10px;
         }
         
         /* --- END CRITICAL RENDER FIX --- */
 
-        /* --- SPLASH SCREEN SPECIFIC --- */
+        /* --- SPLASH SCREEN SPECIFIC (Unchanged) --- */
         #splash-screen {
             z-index: 200; 
             display: flex; 
@@ -205,7 +195,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- BUTTONS & INPUTS --- */
+        /* --- BUTTONS & INPUTS (Unchanged) --- */
         button { 
             padding: 14px 30px; 
             margin: 8px; 
@@ -280,17 +270,15 @@
             display: grid; 
             grid-template-columns: repeat(var(--board-size), 1fr);
             
-            /* CRITICAL FIX: Ensure the inner grid fills its absolute parent */
-            height: 100%; 
+            /* CRITICAL FIX: Ensure the inner grid fills its space */
+            width: 100%; 
+            max-width: 450px;
             
             grid-gap: 8px; 
             padding: 10px;
             background: var(--color-panel-bg); 
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
-            
-            width: 95%; 
-            max-width: 450px;
         } 
         
         .cell { 
@@ -343,15 +331,10 @@
         }
         
         #post-game-actions {
-             position: absolute;
-             bottom: 120px;
-             left: 50%;
-             transform: translateX(-50%);
-             z-index: 20;
-             margin: 0;
+             margin: 10px 0;
         }
 
-        /* --- CHAT OVERLAY --- */
+        /* --- CHAT OVERLAY (Unchanged) --- */
         #chat-overlay {
             position: fixed;
             top: 0;
@@ -414,13 +397,15 @@
     <button id="chatOpenBtn" onclick="toggleChatOverlay()" class="fixed-control">💬 Chat</button>
 
     <div id="splash-screen" class="screen">
-        <p>Seb Creations Presents</p>
-        <h1>XOX ARENA</h1>
-        <p id="tagline">“Think Fast. Strike Smart. Rule the Grid.”</p>
-        
-        <button id="play-button" onclick="handlePlayClick()">PLAY GAME</button>
-        
-        <div id="loading-spinner"></div>
+        <div class="screen-content">
+            <p>Seb Creations Presents</p>
+            <h1>XOX ARENA</h1>
+            <p id="tagline">“Think Fast. Strike Smart. Rule the Grid.”</p>
+            
+            <button id="play-button" onclick="handlePlayClick()">PLAY GAME</button>
+            
+            <div id="loading-spinner"></div>
+        </div>
     </div>
 
     <div id="home-screen" class="screen">
