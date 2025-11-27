@@ -142,7 +142,7 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* --- BUTTONS & INPUTS (Unchanged) --- */
+        /* --- BUTTONS & INPUTS --- */
         button { 
             padding: 14px 30px; 
             margin: 8px; 
@@ -158,6 +158,23 @@
             transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s; 
         } 
         button:hover { background: #393e46; }
+        
+        /* Neon Style for Main Menu Buttons */
+        .neon-button {
+            background: var(--color-panel-bg); 
+            border: 2px solid var(--color-secondary-accent);
+            color: var(--color-secondary-accent);
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.6), inset 0 0 8px rgba(57, 255, 20, 0.4); 
+            transition: all 0.3s ease-in-out;
+            margin: 12px 8px; /* Slightly more vertical margin */
+        }
+        .neon-button:hover {
+            background: rgba(57, 255, 20, 0.1); 
+            color: var(--color-text-light);
+            transform: translateY(-3px);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 1), 0 6px 12px rgba(0, 0, 0, 0.6);
+        }
+        
         button.active { 
             background: var(--color-secondary-accent); 
             color: var(--color-dark-bg); 
@@ -333,8 +350,8 @@
             <h1>XOX ARENA</h1>
             <p id="tagline" style="margin-top: 0;">“Think Fast. Strike Smart. Rule the Grid.”</p>
             <div id="main-controls" style="display: flex; flex-direction: column; align-items: center; margin-top: 50px;">
-                <button onclick="showScreen('local-config')">PLAY LOCAL / AI</button>
-                <button onclick="showScreen('online-lobby')">ONLINE MULTIPLAYER</button>
+                <button onclick="showScreen('local-config')" class="neon-button">PLAY LOCAL / AI</button>
+                <button onclick="showScreen('online-lobby')" class="neon-button">ONLINE MULTIPLAYER</button>
             </div>
         </div>
     </div>
@@ -433,7 +450,9 @@
         <p>Developed by <b>Seb-Creations</b> | XOX Arena</p>
     </footer>
 
-    <audio id="bgMusic" loop src="your_audio_file.mp3" preload="auto"></audio> 
+    <audio id="menuMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-sci-fi-game-intro-2426.mp3" preload="auto"></audio> 
+    
+    <audio id="gameMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-cyber-attack-1335.mp3" preload="auto"></audio> 
 
     <script>
         
@@ -447,36 +466,7 @@
         
         // CRITICAL INITIAL STATE: Make sure splash screen is visible on load.
         splashScreen.classList.add('active'); 
-
-        /**
-         * Handles the click on the "PLAY GAME" button, showing the spinner
-         * and waiting for the loading time before transitioning to the home screen.
-         */
-        function handlePlayClick() {
-            // 1. Hide the button and show the spinner
-            if (playButton) playButton.style.display = 'none';
-            if (loadingSpinner) loadingSpinner.style.display = 'block';
-
-            // 2. Start the loading sequence
-            setTimeout(() => {
-                // 3. Navigate to the home screen
-                showScreen('home-screen');
-                
-                // 4. Force the splash screen off the stack
-                if (splashScreen) {
-                    // Use a slight delay to allow home-screen to fully render/transition in
-                    setTimeout(() => {
-                        splashScreen.classList.remove('active');
-                        splashScreen.style.display = 'none'; 
-                    }, 100); 
-                }
-                
-                // 5. Reset splash screen button state (optional, as the screen is now hidden)
-                if (loadingSpinner) loadingSpinner.style.display = 'none';
-                if (playButton) playButton.style.display = 'block'; 
-            }, LOADING_TIME_MS);
-        }
-
+        
         // --- FIREBASE CONFIGURATION (Unchanged) --- 
         const firebaseConfig = { 
             apiKey: "AIzaSyAFUoT40IjaiqH2791QvyNUP6SakHarupY", 
@@ -527,7 +517,10 @@
         const scoreX = document.getElementById('scoreX'); 
         const scoreO = document.getElementById('scoreO'); 
         const scoreDraws = document.getElementById('scoreDraws'); 
-        const bgMusic = document.getElementById('bgMusic'); 
+        // MUSIC ELEMENTS
+        const menuMusic = document.getElementById('menuMusic'); 
+        const gameMusic = document.getElementById('gameMusic'); 
+        // END MUSIC ELEMENTS
         const roomIdInput = document.getElementById('roomIdInput'); 
         const gameStatusP = document.getElementById('gameStatus'); 
         const onlineScoreboardDiv = document.getElementById('online-scoreboard'); 
@@ -547,6 +540,69 @@
         const gameTitle = document.getElementById('gameTitle');
         const chatOverlay = document.getElementById('chat-overlay');
 
+
+        /**
+         * Ensures music state is correctly managed based on the active screen.
+         * @param {string} screenId - The ID of the screen being activated.
+         */
+        function playMusic(audioElem, volume = 0.3) {
+            if (!isMuted && audioElem && audioElem.paused) {
+                audioElem.volume = volume;
+                audioElem.currentTime = 0; 
+                audioElem.play().catch(e => console.log("Audio play prevented:", e));
+            }
+        }
+
+        function stopMusic(audioElem) {
+            if (audioElem && !audioElem.paused) {
+                audioElem.pause();
+            }
+        }
+        
+        function manageMusic(screenId) {
+            if (screenId === 'game-screen') {
+                stopMusic(menuMusic);
+                playMusic(gameMusic, 0.4); 
+            } else if (screenId === 'splash-screen' || screenId === 'home-screen' || screenId === 'online-lobby' || screenId === 'local-config') {
+                stopMusic(gameMusic);
+                playMusic(menuMusic, 0.3);
+            } else {
+                stopMusic(menuMusic);
+                stopMusic(gameMusic);
+            }
+        }
+        
+        /**
+         * Handles the click on the "PLAY GAME" button, showing the spinner
+         * and waiting for the loading time before transitioning to the home screen.
+         */
+        function handlePlayClick() {
+            // 1. Hide the button and show the spinner
+            if (playButton) playButton.style.display = 'none';
+            if (loadingSpinner) loadingSpinner.style.display = 'block';
+            
+            // Initial music start (menuMusic will start)
+            playMusic(menuMusic, 0.3);
+
+            // 2. Start the loading sequence
+            setTimeout(() => {
+                // 3. Navigate to the home screen (which triggers showScreen/manageMusic)
+                showScreen('home-screen');
+                
+                // 4. Force the splash screen off the stack
+                if (splashScreen) {
+                    // Use a slight delay to allow home-screen to fully render/transition in
+                    setTimeout(() => {
+                        splashScreen.classList.remove('active');
+                        splashScreen.style.display = 'none'; 
+                    }, 100); 
+                }
+                
+                // 5. Reset splash screen button state (optional, as the screen is now hidden)
+                if (loadingSpinner) loadingSpinner.style.display = 'none';
+                if (playButton) playButton.style.display = 'block'; 
+            }, LOADING_TIME_MS);
+        }
 
         // --- SCREEN MANAGEMENT ---
         
@@ -571,6 +627,9 @@
             if (screenId !== 'game-screen') {
                 chatOverlay.classList.remove('visible'); // Hide chat when leaving game screen
             }
+            
+            // --- MUSIC MANAGEMENT ---
+            manageMusic(screenId);
             
             // Special handling for screen transitions
             if (screenId === 'game-screen' && isGameStart) {
@@ -1198,7 +1257,16 @@
 
         function toggleMute() { 
             isMuted = !isMuted; 
-            bgMusic.muted = isMuted; 
+            
+            // Apply mute state to both tracks
+            if (menuMusic) menuMusic.muted = isMuted; 
+            if (gameMusic) gameMusic.muted = isMuted; 
+            
+            // If unmuting, ensure the correct track starts playing
+            if (!isMuted) {
+                manageMusic(currentScreen);
+            }
+            
             document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊'; 
         } 
         
