@@ -86,12 +86,33 @@
             to { opacity: 1; }
         }
 
+        /* --- CRITICAL RENDER FIX FOR CHROME MOBILE (UPDATED) --- */
         .screen-content {
             flex-grow: 1; 
-            overflow-y: auto; 
-            padding-top: 40px; 
-            padding-bottom: 50px; 
+            /* REMOVED: overflow-y: auto; padding-top: 40px; padding-bottom: 50px; */ 
+            padding: 0; /* Set to 0 here, and handle padding inside the screens */
+            box-sizing: border-box;
+            /* Force the content area to manage vertical space correctly */
+            display: flex;
+            flex-direction: column;
+            align-items: center; 
+            height: 100%; /* Important: Take full height */
+            overflow-y: auto; /* Allow scroll if content is too tall */
         }
+        
+        #game-board-container {
+            /* Force the container to take necessary space and contain its children */
+            flex-grow: 1; /* Allow it to take up available vertical space */
+            flex-shrink: 0; /* Prevent it from shrinking */
+            width: 100%; /* Match parent width */
+            max-width: 450px; /* Keep max-width constraint */
+            display: flex; /* Make it a flex container */
+            justify-content: center; /* Center the game board */
+            align-items: center; /* Center the game board vertically */
+            /* THIS IS THE CRITICAL HACK: Forces layout calculation and prevents collapse */
+            overflow: hidden; 
+        }
+        /* --- END CRITICAL RENDER FIX --- */
 
         /* --- SPLASH SCREEN SPECIFIC --- */
         #splash-screen {
@@ -240,7 +261,7 @@
             grid-template-columns: repeat(var(--board-size), 1fr);
             width: 95%; 
             max-width: 450px;
-            margin: 20px auto 0 auto;
+            margin: 20px auto 0 auto; /* Keep auto margins for centering */
         } 
         .cell { 
             aspect-ratio: 1 / 1; 
@@ -463,7 +484,7 @@
     
     <div id="ai-config" class="screen">
         <div class="screen-content">
-            <h1>PLAY AI SETUP</h1>
+            <h1 style="padding-top: 20px;">PLAY AI SETUP</h1>
             <p>AI is restricted to 3x3 for balanced play.</p>
             
             <div id="aiBoardSizeControls">
@@ -487,7 +508,7 @@
     </div>
     <div id="local-config" class="screen">
         <div class="screen-content">
-            <h1>LOCAL 2-PLAYER SETUP</h1>
+            <h1 style="padding-top: 20px;">LOCAL 2-PLAYER SETUP</h1>
             
             <div id="boardSizeControls">
                 <h3>Select Board Size</h3>
@@ -512,7 +533,7 @@
 
     <div id="online-lobby" class="screen">
         <div class="screen-content">
-            <h1>ONLINE LOBBY</h1>
+            <h1 style="padding-top: 20px;">ONLINE LOBBY</h1>
             
             <div id="online-lobby-controls">
                 <h3>Current Board Size: <span id="lobbyBoardSize">3x3</span></h3>
@@ -540,9 +561,7 @@
 
     <div id="game-screen" class="screen">
         <div class="screen-content"> 
-            <h2 id="gameTitle">Local Game</h2>
-            
-            <div id="player-names-display">
+            <h2 id="gameTitle" style="padding-top: 20px;">Local Game</h2> <div id="player-names-display">
                 <p id="nameX" style="color: var(--color-primary-accent); display: inline-block; margin-right: 20px;">X: Player X</p>
                 <p id="nameO" style="color: var(--color-secondary-accent); display: inline-block;">O: Player O</p>
             </div>
@@ -560,8 +579,7 @@
                 <button id="rematchBtn" class="neon-button" onclick="handleRematch()">REMATCH</button>
             </div>
             
-            <div id="scoreboard">
-                <div id="local-scoreboard" class="scoreboard-panel">
+            <div id="scoreboard" style="margin-bottom: 20px;"> <div id="local-scoreboard" class="scoreboard-panel">
                     <h2>LOCAL SCORE</h2>
                     <p><span id="nameScoreX">Player X</span>: <span id="scoreX">0</span></p>
                     <p><span id="nameScoreO">Player O</span>: <span id="scoreO">0</span></p>
