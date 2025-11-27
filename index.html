@@ -134,10 +134,10 @@
             min-width: min(100%, 450px);
             margin: 5px 0; 
             
-            /* CRITICAL FIX: Adjusted Max-Height buffer to 230px (was 270px) 
-            to ensure the board is not cut off on mobile.
+            /* CRITICAL FIX 4: Explicitly set max height based on viewport 
+               - Increased to 310px for safer fit across various mobile browsers/UIs.
             */
-            max-height: calc((var(--vh, 1vh) * 100) - 230px); 
+            max-height: calc((var(--vh, 1vh) * 100) - 310px); 
             height: 100%; /* Default to 100% of available space */
         }
 
@@ -169,9 +169,12 @@
             background: var(--color-cell-bg); 
             color: var(--color-text-light); 
             border-radius: 5px;
-            transition: background 0.2s, color 0.2s;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
         } 
-        .cell:hover { background: var(--color-cell-hover); }
+        .cell:hover { 
+            background: var(--color-cell-hover); 
+            box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); 
+        }
         .cell.winner { 
             background: var(--color-secondary-accent); 
             box-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
@@ -217,7 +220,21 @@
         } 
         button:hover { background: var(--color-cell-hover); }
         
-        /* Neon Style for Main Menu Buttons */
+        /* RESTORING SPLASH BUTTON COLOR */
+        #splash-screen button {
+            background: var(--color-primary-accent);
+            color: var(--color-text-dark);
+            box-shadow: 0 0 15px rgba(0, 191, 255, 0.6), 0 4px 6px rgba(0, 0, 0, 0.5);
+            font-size: 1.2rem;
+            margin-top: 30px;
+        }
+        #splash-screen button:hover {
+            background: #4defff;
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px var(--color-primary-accent), 0 6px 12px rgba(0, 0, 0, 0.6);
+        }
+        
+        /* Neon Style for Menu Buttons */
         .neon-button {
             background: var(--color-panel-bg); 
             border: 2px solid var(--color-secondary-accent);
@@ -397,6 +414,23 @@
             background: var(--color-primary-accent);
             color: var(--color-text-dark);
             box-shadow: none;
+        }
+        
+        /* RESTORING SPINNER STYLES */
+        #loading-spinner {
+            display: none;
+            border: 4px solid var(--color-panel-bg);
+            border-top: 4px solid var(--color-secondary-accent);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -578,7 +612,7 @@
         <p>Developed by <b>Seb-Creations</b> | XOX Arena</p>
     </footer>
 
-    <audio id="menuMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-sci-fi-game-intro-2426.mp3" preload="auto"></audio> 
+    <audio id="menuMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-sci-fi-game-intro-2426.mpload="auto"></audio> 
     <audio id="gameMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-cyber-attack-1335.mp3" preload="auto"></audio> 
     
     <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-button-click-1944.mp3" preload="auto"></audio>
@@ -754,19 +788,21 @@
         function handlePlayClick() {
             if (playButton) playButton.style.display = 'none';
             if (loadingSpinner) loadingSpinner.style.display = 'block';
-            
+
             playMusic(menuMusic, 0.3);
 
             setTimeout(() => {
                 showScreen('home-screen');
                 
                 if (splashScreen) {
+                    // Give a small delay for the fade out to be visually clear
                     setTimeout(() => {
                         splashScreen.classList.remove('active');
                         splashScreen.style.display = 'none'; 
                     }, 100); 
                 }
                 
+                // Revert the splash screen elements
                 if (loadingSpinner) loadingSpinner.style.display = 'none';
                 if (playButton) playButton.style.display = 'block'; 
             }, LOADING_TIME_MS);
