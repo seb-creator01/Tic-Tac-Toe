@@ -550,14 +550,29 @@
 
 
         /**
+         * Sets the initial volume and state for all audio elements.
+         */
+        function initializeAudioState() {
+            const allAudio = [menuMusic, gameMusic, clickSound, winSound, drawSound];
+            allAudio.forEach(audioElem => {
+                if (audioElem) {
+                    audioElem.volume = 0.4; // Set a default volume
+                    audioElem.muted = isMuted;
+                }
+            });
+        }
+
+        /**
          * Ensures music state is correctly managed based on the active screen.
          * @param {string} screenId - The ID of the screen being activated.
          */
         function playMusic(audioElem, volume = 0.3) {
-            if (!isMuted && audioElem && audioElem.paused) {
+            if (!audioElem) return; 
+            
+            if (!isMuted && audioElem.paused) {
                 audioElem.volume = volume;
                 audioElem.currentTime = 0; 
-                audioElem.play().catch(e => console.log("Audio play prevented:", e));
+                audioElem.play().catch(e => console.log("Audio play prevented/blocked:", e));
             }
         }
         
@@ -567,10 +582,14 @@
          * @param {number} volume - Volume (0.0 to 1.0).
          */
         function playSoundEffect(audioElem, volume = 0.8) {
-             if (audioElem && !isMuted) {
+             if (!audioElem) return;
+
+             if (!isMuted) {
                 audioElem.volume = volume;
-                audioElem.currentTime = 0; // Rewind to start for instant playback
-                audioElem.play().catch(e => console.log("Sound effect play prevented:", e));
+                // CRITICAL FIX: Rewind and reload to ensure the short sound is always ready
+                audioElem.pause();
+                audioElem.currentTime = 0; 
+                audioElem.play().catch(e => console.log("Sound effect play failed:", e));
             }
         }
 
@@ -602,7 +621,7 @@
             if (playButton) playButton.style.display = 'none';
             if (loadingSpinner) loadingSpinner.style.display = 'block';
             
-            // Initial music start (menuMusic will start)
+            // Initial music start (menuMusic will start) - This fulfils the user interaction required for audio
             playMusic(menuMusic, 0.3);
 
             // 2. Start the loading sequence
@@ -1295,12 +1314,15 @@
         function toggleMute() { 
             isMuted = !isMuted; 
             
-            // Apply mute state to all audio elements
-            if (menuMusic) menuMusic.muted = isMuted; 
-            if (gameMusic) gameMusic.muted = isMuted; 
-            if (clickSound) clickSound.muted = isMuted; // NEW
-            if (winSound) winSound.muted = isMuted;     // NEW
-            if (drawSound) drawSound.muted = isMuted;   // NEW
+            // Get all audio elements dynamically
+            const allAudio = [menuMusic, gameMusic, clickSound, winSound, drawSound];
+            
+            // Apply mute state to all audio elements (CRITICAL FIX)
+            allAudio.forEach(audioElem => {
+                if (audioElem) {
+                    audioElem.muted = isMuted;
+                }
+            });
             
             // If unmuting, ensure the correct track starts playing
             if (!isMuted) {
@@ -1335,6 +1357,9 @@
         });
         window.addEventListener('orientationchange', setAppHeight);
         setAppHeight(); 
+        
+        // CRITICAL INITIAL CALL: Initialize the volume and mute state for all audio elements
+        initializeAudioState(); 
         
     </script>
 </body>
