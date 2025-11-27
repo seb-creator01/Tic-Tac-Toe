@@ -817,9 +817,6 @@
             // Special handling for screen transitions
             if (screenId === 'game-screen' && isGameStart) {
                 if (mode === 'local' || mode === 'ai') {
-                    resetGame();
-                    localScoreboardDiv.style.display = 'inline-block';
-                    onlineScoreboardDiv.style.display = 'none';
                     
                     // Set local player names
                     playerNames['X'] = document.getElementById(mode === 'local' ? 'playerNameX' : 'playerNameAIAI').value || 'Player X';
@@ -830,6 +827,14 @@
                     updatePlayerNamesDisplay();
 
                     gameTitle.textContent = mode === 'local' ? 'LOCAL FRIEND GAME' : `AI GAME (${aiDifficulty.toUpperCase()})`;
+                    
+                    // --- CRITICAL FIXES ADDED HERE TO ENSURE BOARD RENDERING ---
+                    // 1. Ensure board size CSS is calculated for the current view
+                    setBoardSize(boardSize, null, true, currentScreen); 
+                    // 2. Reset the game and draw the board (also starts the timer)
+                    resetGame();
+                    // -----------------------------------------------------------
+
                 } else if (mode === 'online' && localPlayer) {
                     gameTitle.textContent = `ONLINE GAME (${playerNames[localPlayer]})`;
                     localScoreboardDiv.style.display = 'none';
