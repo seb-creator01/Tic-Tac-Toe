@@ -25,6 +25,7 @@
             margin: 0; 
             padding: 0; 
             overflow: hidden; 
+            overflow-x: hidden; /* Prevent horizontal scrolling */
             font-family: 'Roboto', 'Segoe UI', sans-serif; 
             background: var(--color-dark-bg);
             color: var(--color-text-light); 
@@ -82,6 +83,65 @@
             padding-top: 40px; 
             padding-bottom: 50px; 
         }
+        
+        /* --- CORE GAME BOARD FIXES --- */
+        
+        /* ✅ FIX 1: Make game board container responsive and centered */
+        #game-board-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            max-width: 600px; /* Use the max-width of the screen */
+            height: auto;
+            padding: 10px;
+            box-sizing: border-box;
+            margin: 10px auto;
+        }
+
+        /* ✅ FIX 2: Grid layout for the board, using the custom CSS property for size */
+        #game { 
+            /* Renamed CSS selector from #game to .board for the fix, but keeping ID in HTML for JS */
+            /* The actual grid structure is defined here */
+            display: grid;
+            grid-gap: 5px; 
+            padding: 10px;
+            background: var(--color-panel-bg); 
+            border-radius: 12px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
+            /* Uses the JS-set board-size variable */
+            grid-template-columns: repeat(var(--board-size), 1fr); 
+            
+            /* Use a max size based on viewport/screen size */
+            width: 90vw;
+            max-width: 450px;
+            margin: 0; /* Important: remove auto margin here, container handles center */
+        } 
+        
+        /* ✅ FIX 3: Each cell adjusts to screen size */
+        .cell { 
+            width: 100%; /* Take up the full grid column width */
+            aspect-ratio: 1 / 1; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Use the dynamic font size calculated in JS */
+            font-size: var(--font-size, 3rem); 
+            font-weight: 900;
+            cursor: pointer;
+            background: #242629; 
+            color: var(--color-text-light); 
+            border-radius: 5px;
+            text-align: center;
+            vertical-align: middle;
+            line-height: 1;
+        } 
+        .cell:hover { background: #393e46; }
+        .cell.winner { 
+            background: var(--color-secondary-accent); 
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
+            color: var(--color-dark-bg);
+        } 
 
         /* --- SPLASH SCREEN SPECIFIC (Increased visibility) --- */
         #splash-screen { z-index: 200; justify-content: center; align-items: center; flex-direction: column; }
@@ -97,6 +157,21 @@
             margin: 5px;
             font-weight: 700;
         }
+
+        /* --- TIMER & STATUS (Unchanged) --- */
+        #gameStatus strong {
+            color: var(--color-secondary-accent);
+            text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
+        }
+        #timer {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin: 10px 0;
+            color: var(--color-primary-accent);
+        }
+
+        /* --- Other Styles (Buttons, Chat, Footer) (Unchanged) --- */
+        /* ... (all other styles remain here) ... */
 
         /* --- TAGLINE VISIBILITY ENHANCEMENT --- */
         #tagline {
@@ -221,51 +296,7 @@
         #muteBtn { right: 10px; }
         #backBtn { left: 10px; display: none; }
         #chatOpenBtn { right: 100px; display: none; } 
-
-        /* --- GAME BOARD (Unchanged) --- */
-        #game { 
-            grid-gap: 8px; 
-            padding: 10px;
-            background: var(--color-panel-bg); 
-            border-radius: 12px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
-            display: grid;
-            grid-template-columns: repeat(var(--board-size), 1fr);
-            width: 95%; 
-            max-width: 450px;
-            margin: 0 auto;
-        } 
-        .cell { 
-            aspect-ratio: 1 / 1; 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: var(--font-size, 3rem); 
-            font-weight: 900;
-            cursor: pointer;
-            background: #242629; 
-            color: var(--color-text-light); 
-            border-radius: 5px;
-        } 
-        .cell:hover { background: #393e46; }
-        .cell.winner { 
-            background: var(--color-secondary-accent); 
-            box-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
-            color: var(--color-dark-bg);
-        } 
-
-        /* --- TIMER & STATUS --- */
-        #gameStatus strong {
-            color: var(--color-secondary-accent);
-            text-shadow: 0 0 5px rgba(57, 255, 20, 0.5);
-        }
-        #timer {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin: 10px 0;
-            color: var(--color-primary-accent);
-        }
-
+        
         /* --- CHAT OVERLAY (Unchanged) --- */
         #chat-overlay {
             position: fixed;
@@ -460,9 +491,9 @@
                 <p id="gameStatus">Game in progress...</p>
                 <p id="timer" style="display: none;">Turn Time Left: <span id="timerValue">30s</span></p>
                 
-                <div id="game-board-container">
+                <div id="game-board-container" class="board-container">
                     <div id="game">
-                    </div>
+                        </div>
                 </div>
             </div>
             
@@ -513,15 +544,12 @@
     <script>
         
         // --- NEW SPLASH SCREEN HANDLER ---
-        const LOADING_TIME_MS = 3000; // Reduced to 3 seconds for smoother transition
+        const LOADING_TIME_MS = 3000; 
 
         // Fetching elements early
         const splashScreen = document.getElementById('splash-screen');
         const playButton = document.getElementById('play-button');
         const loadingSpinner = document.getElementById('loading-spinner');
-        
-        // CRITICAL INITIAL STATE: Make sure splash screen is visible on load.
-        // Handled at the end of the script after all functions are defined.
         
         // --- FIREBASE CONFIGURATION (Unchanged) --- 
         const firebaseConfig = { 
@@ -559,15 +587,15 @@
         let localPlayer = null; 
         let roomId = null; 
         let currentScreen = 'splash-screen'; 
-        let lastLocalConfig = { size: 3, mode: 'local', difficulty: 'easy' }; // NEW: For Rematch
+        let lastLocalConfig = { size: 3, mode: 'local', difficulty: 'easy' }; 
 
         // --- Timer State Variables (Updated for countdown) ---
         let timerInterval = null; 
-        let timerCountdown = 0; // The time remaining in seconds
+        let timerCountdown = 0; 
         const TIME_LIMIT_SECONDS = 30;
 
         let autoResetTimeout = null;
-        let lastMoveTimeRef = Date.now(); // Used for local/AI move tracking
+        let lastMoveTimeRef = Date.now(); 
         
         // --- DOM Elements (Updated to include new elements) ---
         const gameDiv = document.getElementById('game'); 
@@ -578,10 +606,10 @@
         // MUSIC ELEMENTS
         const menuMusic = document.getElementById('menuMusic'); 
         const gameMusic = document.getElementById('gameMusic'); 
-        const moveSfx = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-click-900.mp3'); // NEW SFX
-        const winSfx = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chime-and-applause-2016.mp3'); // NEW SFX
-        const drawSfx = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-small-bell-ring-1094.mp3'); // NEW SFX
-        const failSfx = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-bass-buzzer-949.mp3'); // NEW SFX
+        const moveSfx = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-sci-fi-click-900.mp3'); 
+        const winSfx = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-winning-chime-and-applause-2016.mp3'); 
+        const drawSfx = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-small-bell-ring-1094.mp3'); 
+        const failSfx = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-wrong-answer-bass-buzzer-949.mp3'); 
 
         // END MUSIC ELEMENTS
         const roomIdInput = document.getElementById('roomIdInput'); 
@@ -602,8 +630,8 @@
         const startGameOnlineBtn = document.getElementById('startGameOnlineBtn');
         const gameTitle = document.getElementById('gameTitle');
         const chatOverlay = document.getElementById('chat-overlay');
-        const rematchBtn = document.getElementById('rematchBtn'); // NEW: Rematch Button
-        const emojiPanel = document.getElementById('emoji-panel'); // NEW: Emoji Panel
+        const rematchBtn = document.getElementById('rematchBtn'); 
+        const emojiPanel = document.getElementById('emoji-panel'); 
 
         /**
          * Ensures music state is correctly managed based on the active screen.
@@ -780,10 +808,10 @@
             mode = 'local'; 
         }
         
-        // --- Timer Logic (Countdown) ---
+        // --- Timer Logic (Countdown) (Unchanged) ---
         function handleTimeLimitReached() {
             if (!gameActive) { stopTimer(); return; }
-            playSfx(failSfx); // NEW SFX
+            playSfx(failSfx); 
             
             const nextPlayer = currentPlayer === 'X' ? 'O' : 'X';
             if (mode === 'online') {
@@ -849,7 +877,7 @@
             }
         }
         
-        // --- Core Game Logic Functions (Updated) ---
+        // --- Core Game Logic Functions (Updated for Responsiveness) ---
         function getWinLength(size) {
             return size;
         }
@@ -863,14 +891,14 @@
                 board = Array(newBoardLength).fill('');
             }
             
-            gameDiv.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-            
-            let cellSize, fontSize;
-            const containerWidth = Math.min(window.innerWidth * 0.95, 500); 
-            cellSize = (containerWidth / size) - (size === 3 ? 5 : 4); 
-            fontSize = cellSize / 2.5; 
-            
-            gameDiv.style.setProperty('--cell-size', `${cellSize}px`);
+            // --- CORE CHANGE: Responsive sizing using window width ---
+            let fontSize;
+            // Calculate a responsive font size based on the window's inner width and board size
+            const baseFontSize = 80; // Larger base size for better visibility
+            fontSize = (baseFontSize / size) * (window.innerWidth / 450); 
+            fontSize = Math.min(Math.max(fontSize, 20), 70); // Clamp between 20px and 70px
+
+            // Set CSS variables for grid and cell sizing/font
             gameDiv.style.setProperty('--font-size', `${fontSize}px`);
             gameDiv.style.setProperty('--board-size', size); // Set CSS variable
             
@@ -956,7 +984,7 @@
         function handleClick(index) { 
             if (!gameActive || board[index]) return; 
             
-            playSfx(moveSfx); // NEW: Play move SFX
+            playSfx(moveSfx); 
 
             if (mode === 'online') { 
                 if (currentPlayer !== localPlayer) { 
@@ -969,11 +997,11 @@
                 const result = checkWinner(board, true);
                 
                 if (result.winner) {
-                    rematchBtn.style.display = 'block'; // Show Rematch button on game end
+                    rematchBtn.style.display = 'block'; 
                     updateLocalScore(result.winner);
                     drawBoard();
                     
-                    if (result.winner === 'Draw') { playSfx(drawSfx); } else { playSfx(winSfx); } // NEW SFX
+                    if (result.winner === 'Draw') { playSfx(drawSfx); } else { playSfx(winSfx); } 
                     
                 } else {
                     currentPlayer = currentPlayer === 'X' ? 'O' : 'X'; 
@@ -988,7 +1016,6 @@
 
         function checkWinner(currentBoard, updateGlobalState = false) {
             const size = boardSize;
-            // Determine N-in-a-Row: 3 for 3x3, 4 for 4x4, 5 for 5x5
             const N = size === 3 ? 3 : size; 
 
             const index = (r, c) => r * size + c;
@@ -1015,12 +1042,10 @@
                 [0, 1], [1, 0], [1, 1], [1, -1] 
             ];
 
-            // Only check starting positions where a win is possible
             for (let r = 0; r < size; r++) {
                 for (let c = 0; c < size; c++) {
                     if (currentBoard[index(r, c)]) {
                         for (let [dr, dc] of directions) {
-                            // Boundary check: ensure the line of length N fits within the board
                             if ((dr === 1 && r > size - N) || (dc === 1 && c > size - N) || (dc === -1 && c < N - 1) ) continue;
 
                             const result = checkLine(r, c, dr, dc);
@@ -1038,7 +1063,6 @@
                 return { winner: 'Draw' };
             }
 
-             // NEW: Logic to hide rematch before the game finishes
             if (updateGlobalState && gameActive && rematchBtn.style.display !== 'none') {
                 rematchBtn.style.display = 'none';
             }
@@ -1068,16 +1092,15 @@
             currentPlayer = 'X'; 
             gameActive = true; 
             drawBoard(); 
-            rematchBtn.style.display = 'none'; // Ensure it's hidden after reset
+            rematchBtn.style.display = 'none'; 
             resetLocalTimer(); 
         } 
 
         function handleRematch() {
             stopTimer();
-            rematchBtn.style.display = 'none'; // Hide button immediately
+            rematchBtn.style.display = 'none'; 
             
             if (mode === 'online' && localPlayer) {
-                // Online Rematch: Only X player can trigger the official reset in Firebase
                 if (localPlayer === 'X') {
                     const newBoardLength = boardSize * boardSize;
                     db.ref('games/' + roomId).update({ 
@@ -1087,11 +1110,9 @@
                         lastMoveTime: firebase.database.ServerValue.TIMESTAMP 
                     });
                 } else {
-                    // O player just waits for X to initiate the reset
                     gameStatusP.textContent = "Waiting for Player X to start the rematch...";
                 }
             } else {
-                // Local/AI Rematch: Use the last successful config
                 boardSize = lastLocalConfig.size;
                 mode = lastLocalConfig.mode;
                 aiDifficulty = lastLocalConfig.difficulty;
@@ -1145,7 +1166,6 @@
             let message = emoji || chatInput.value.trim();
             if (!message) return;
 
-            // Limit message length only for text input
             if (!emoji && message.length > 100) {
                 message = message.substring(0, 100);
             }
@@ -1157,13 +1177,12 @@
                 timestamp: firebase.database.ServerValue.TIMESTAMP
             });
 
-            chatInput.value = ''; // Clear input only if not an emoji
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Ensure scroll on send
+            chatInput.value = ''; 
+            chatMessages.scrollTop = chatMessages.scrollHeight; 
         }
 
         function syncChat() {
             if (!db || !roomId) return;
-            // First, clear old listeners
             db.ref('games/' + roomId + '/chat').off(); 
             chatMessages.innerHTML = ''; 
 
@@ -1274,15 +1293,12 @@
                 if (prevGameActive && !gameActive) { 
                     if (autoResetTimeout) clearTimeout(autoResetTimeout);
                     
-                    // Show Rematch button for both players after an online game ends
                     rematchBtn.style.display = 'block'; 
 
-                    // Auto-reset logic (X player only triggers the reset after a delay)
                     autoResetTimeout = setTimeout(() => { 
                         if (localPlayer === 'X') {
                             db.ref('games/' + roomId).once('value', currentSnapshot => {
                                 const currentGameState = currentSnapshot.val();
-                                // Only reset if the game is still inactive after timeout
                                 if (!currentGameState.gameActive) {
                                     const newBoardLength = currentGameState.boardSize * currentGameState.boardSize;
 
@@ -1296,12 +1312,11 @@
                                 }
                             });
                         }
-                    }, 5000); // Wait 5 seconds before X forces a reset
+                    }, 5000); 
                 } else if (gameActive) {
-                    rematchBtn.style.display = 'none'; // Hide rematch button if game is active
+                    rematchBtn.style.display = 'none'; 
                 }
 
-                // Check for opponent connection status (Simple check)
                 if (currentScreen === 'online-lobby' && localPlayer === 'X' && gameState.playerX && !gameState.playerO) {
                     document.getElementById('onlineStatus').textContent = `Game created! Your ID is: ${roomId}. Waiting for Player O...`; 
                 } else if (currentScreen === 'online-lobby' && gameState.playerX && gameState.playerO) {
@@ -1332,7 +1347,6 @@
 
                 if (result.winner) {
                     updateData.gameActive = false;
-                    // Keep the current player as winner until reset
                     updateData.currentPlayer = localPlayer; 
                     
                     if (result.winner === 'X') newScores.scoreX++; 
@@ -1358,7 +1372,6 @@
             if (result.winner !== undefined && result.winner !== null) { return scores[result.winner]; }
             let availableSpots = getEmptyIndices(currentBoard);
             
-            // Should theoretically not happen in 3x3, but for completeness:
             if (availableSpots.length === 0) return scores['Draw']; 
 
             if (player === 'O') {
@@ -1421,11 +1434,11 @@
                 const result = checkWinner(board, true); 
                 
                 if (result.winner) {
-                    rematchBtn.style.display = 'block'; // Show Rematch button on game end
+                    rematchBtn.style.display = 'block'; 
                     updateLocalScore(result.winner);
                     drawBoard(); 
                     
-                    if (result.winner === 'Draw') { playSfx(drawSfx); } else { playSfx(winSfx); } // NEW SFX
+                    if (result.winner === 'Draw') { playSfx(drawSfx); } else { playSfx(winSfx); } 
                 } else {
                     currentPlayer = 'X'; 
                     drawBoard(); 
@@ -1437,17 +1450,14 @@
         function toggleMute() { 
             isMuted = !isMuted; 
             
-            // Apply mute state to all tracks and SFX
             if (menuMusic) menuMusic.muted = isMuted; 
             if (gameMusic) gameMusic.muted = isMuted; 
             
-            // Mute SFX objects directly
             moveSfx.muted = isMuted;
             winSfx.muted = isMuted;
             drawSfx.muted = isMuted;
             failSfx.muted = isMuted;
             
-            // If unmuting, ensure the correct track starts playing
             if (!isMuted) {
                 manageMusic(currentScreen);
             }
@@ -1455,7 +1465,7 @@
             document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊'; 
         } 
         
-        // --- JAVASCRIPT FIX FOR MOBILE VH SCROLLING ---
+        // --- JAVASCRIPT FIX FOR MOBILE VH SCROLLING & RESPONSIVENESS ---
         let resizeTimer; 
 
         function setAppHeight() {
@@ -1465,6 +1475,7 @@
             
             // 2. Recalculate and redraw the board for responsive design on resize
             if (currentScreen === 'game-screen') {
+                // IMPORTANT: Re-run setBoardSize to recalculate responsive font size
                 setBoardSize(boardSize, null, true, mode === 'online' ? 'online-lobby' : 'local-config');
             }
         }
