@@ -159,10 +159,17 @@
         } 
         
         .cell { 
-            aspect-ratio: 1 / 1; 
-            display: flex;
+            /* aspect-ratio: 1 / 1; REMOVED! Replaced by padding hack below for better cross-browser support */
+            position: relative; /* CRITICAL ADDITION for absolute positioning of content */
+            padding-top: 100%; /* CRITICAL FIX: The padding hack for square ratio */
+            
+            /* The display/justify/align properties still work for the cell itself, 
+               but the content needs absolute positioning due to padding-top: 100%
+            */
+            display: flex; 
             justify-content: center;
             align-items: center;
+            
             font-size: var(--font-size, 3rem); 
             font-weight: 900;
             cursor: pointer;
@@ -171,6 +178,15 @@
             border-radius: 5px;
             transition: background 0.2s, color 0.2s, box-shadow 0.2s;
         } 
+        
+        /* CRITICAL NEW RULE: Position the cell's content absolutely to center it within the padding hack */
+        .cell strong { 
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
         .cell:hover { 
             background: var(--color-cell-hover); 
             box-shadow: 0 0 5px rgba(255, 255, 255, 0.2); 
@@ -612,7 +628,7 @@
         <p>Developed by <b>Seb-Creations</b> | XOX Arena</p>
     </footer>
 
-    <audio id="menuMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-sci-fi-game-intro-2426.mpload="auto"></audio> 
+    <audio id="menuMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-sci-fi-game-intro-2426.mp3" preload="auto"></audio> 
     <audio id="gameMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-cyber-attack-1335.mp3" preload="auto"></audio> 
     
     <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-button-click-1944.mp3" preload="auto"></audio>
