@@ -122,7 +122,6 @@
             flex-grow: 1; /* **CRITICAL:** Takes all available remaining height */
             min-height: 0; /* Required for flex-grow to work correctly */
             width: 100%; 
-            max-width: 450px; 
             display: flex; 
             justify-content: center;
             align-items: center; 
@@ -140,12 +139,18 @@
             border-radius: 12px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
             
-            /* CRITICAL FIX: Pure CSS sizing */
-            width: min(100%, 100vh); /* Take minimum of available width or viewport height (max 450px from parent) */
+            /* CRITICAL FIX: Ensures board size is a perfect square limited by the parent's available space */
+            width: 100%; 
             height: 100%;
             aspect-ratio: 1 / 1; /* Enforce square */
-            max-width: 450px;
-            max-height: 100%;
+            max-width: 450px; /* Limits the size on large screens */
+            max-height: 450px; /* Limits the size on large screens */
+            
+            /* NEW CRITICAL SIZING LOGIC: Ensures board is limited by the smallest dimension of its parent container */
+            min-width: 0; /* Prevents overflow */
+            min-height: 0; /* Prevents overflow */
+            align-self: center;
+            justify-self: center;
         } 
         
         .cell { 
@@ -925,8 +930,13 @@
         function drawBoard() { 
             gameDiv.innerHTML = ''; 
             
-            // Ensure font size is calculated based on current board size before drawing
-            calculateAndSetFontSize();
+            // Post-render step: Ensure font size is calculated based on current board size after layout
+            // FIX #2: Use requestAnimationFrame/setTimeout to run font calculation after browser renders layout
+            if (window.requestAnimationFrame) {
+                requestAnimationFrame(calculateAndSetFontSize);
+            } else {
+                setTimeout(calculateAndSetFontSize, 10);
+            }
 
             const finalResult = !gameActive ? checkWinner(board, false) : {};
             
@@ -1438,13 +1448,13 @@
              toggleMute(); 
         });
         
-        // CRITICAL FIX: Force a redraw on resize or orientation change to recalculate font size
+        // CRITICAL FIX #3: Force a redraw on resize or orientation change to recalculate font size
         window.addEventListener('resize', () => {
             setViewportHeight();
             
             if (currentScreen === 'game-screen') {
-                 // A small delay ensures the browser finishes resizing before we measure
-                 setTimeout(calculateAndSetFontSize, 50); 
+                 // A very small delay ensures the browser finishes resizing before we measure
+                 setTimeout(calculateAndSetFontSize, 10); 
             }
         });
         
