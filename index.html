@@ -725,16 +725,18 @@
                     gameTitle.textContent = mode === 'local' ? 'LOCAL FRIEND GAME' : `AI GAME (${aiDifficulty.toUpperCase()})`;
                     
                     setBoardSize(boardSize, null, true, currentScreen); 
-                    // No need to call calculateAndSetBoardSize() here, drawBoard() calls it
-                    resetGame();
                     
+                    // 💥 CRITICAL FIX: Add a small delay for mobile rendering stability 💥
+                    // This ensures the CSS layout settles and the correct viewport size is known 
+                    // before drawBoard() calls calculateAndSetFontSize().
+                    setTimeout(resetGame, 50);
+
                 } else if (mode === 'online' && localPlayer) {
                     gameTitle.textContent = `ONLINE GAME (${playerNames[localPlayer]})`;
                     localScoreboardDiv.style.display = 'none';
                     onlineScoreboardDiv.style.display = 'inline-block';
                     document.getElementById('onlinePlayerName').disabled = true;
                     if (db && roomId) syncGame(); 
-                    // No need to call calculateAndSetBoardSize() here, drawBoard() calls it
                 }
             } else if (screenId === 'local-config') {
                  mode = 'local';
@@ -1444,8 +1446,7 @@
              document.querySelector('#aiDifficultyControls button:last-child').classList.add('active');
              document.getElementById('localPlayBtn').classList.add('active');
              
-             // Toggle mute once to ensure it's functional
-             toggleMute(); 
+             // The initial state of mute is set by the script's first run of toggleMute() later.
         });
         
         // CRITICAL FIX #3: Force a redraw on resize or orientation change to recalculate font size
