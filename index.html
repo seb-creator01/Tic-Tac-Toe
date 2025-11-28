@@ -1058,13 +1058,20 @@
             const totalViewportHeight = window.innerHeight; // Get the raw inner height
             
             // 2. Measure the space taken by elements *outside* the board container
-            const headerHeight = gameInfoHeader.getBoundingClientRect().height;
-            const scoreboardHeight = scoreboardDiv.getBoundingClientRect().height;
-            const footerHeight = document.querySelector('footer').getBoundingClientRect().height;
+            // Ensure elements are visible/in flow before measuring
             
-            // 3. Account for top/back buttons and general screen padding
-            const fixedControlsHeight = backBtn.offsetHeight + 10; // Back button + margin (approx)
-            const screenContentPadding = 20; // 10px top + 10px bottom padding on #game-screen .screen-content
+            // Measure fixed controls (approx)
+            const backBtnHeight = backBtn.offsetHeight;
+            const muteBtnHeight = document.getElementById('muteBtn').offsetHeight;
+            const fixedControlsHeight = Math.max(backBtnHeight, muteBtnHeight) + 10; // Max of the two, plus some margin
+
+            // Measure elements above and below the board container
+            const headerHeight = gameInfoHeader.offsetHeight + 10; // + 10px margin-top from h2
+            const scoreboardHeight = scoreboardDiv.offsetHeight;
+            const footerHeight = document.querySelector('footer').offsetHeight;
+            
+            // Screen content padding is 10px top + 10px bottom
+            const screenContentPadding = 20; 
             
             // 4. Calculate the maximum available height for the board *and* its container
             const totalUsedVerticalSpace = headerHeight + scoreboardHeight + footerHeight + fixedControlsHeight + screenContentPadding;
@@ -1075,6 +1082,7 @@
             const containerWidth = gameBoardContainer.getBoundingClientRect().width;
             
             // 6. Determine the final size by taking the minimum of the calculated height and the width
+            // This ensures the board is always square and fits the smallest dimension
             let finalBoardContainerSize = Math.min(containerWidth, maxAvailableBoardHeight);
             
             // 7. Apply final size constraints 
