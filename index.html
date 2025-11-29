@@ -57,10 +57,8 @@
             text-shadow: 0 0 8px rgba(0, 191, 255, 0.5); /* Blue Neon Glow */
             margin-top: 10px;
         } 
-        h1 { 
-            font-size: 2.5rem;
-        }
-
+        h1 { font-size: 2.5rem; }
+        
         .screen {
             width: 100%;
             height: 100%;
@@ -78,7 +76,7 @@
             animation: fadeIn 0.3s ease-in-out;
             z-index: 100; /* Standard screen layer */
         }
-
+        
         .screen.active { 
             display: flex; /* Shown when active */
         }
@@ -115,7 +113,7 @@
             margin: 5px;
             text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
         }
-
+        
         /* --- TAGLINE VISIBILITY ENHANCEMENT --- */
         #tagline {
             font-size: 1.5rem;
@@ -126,7 +124,7 @@
             margin-top: 20px;
             margin-bottom: 30px;
         }
-
+        
         /* Play Button Style */
         #play-button {
             background: var(--color-primary-accent);
@@ -176,10 +174,8 @@
             cursor: pointer;
             transition: background 0.2s, color 0.2s, box-shadow 0.2s, transform 0.1s; 
         } 
-        button:hover { 
-            background: var(--color-cell-hover);
-        }
-
+        button:hover { background: var(--color-cell-hover); }
+        
         /* Neon Style for Main Menu Buttons */
         .neon-button {
             background: var(--color-panel-bg);
@@ -195,7 +191,7 @@
             transform: translateY(-3px);
             box-shadow: 0 0 20px rgba(57, 255, 20, 1), 0 6px 12px rgba(0, 0, 0, 0.6);
         }
-
+        
         button.active { 
             background: var(--color-secondary-accent);
             color: var(--color-text-dark); /* Ensure dark text on bright button */
@@ -214,7 +210,7 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.6);
             transition: background 0.3s, color 0.3s;
         }
-
+        
         /* Fixed top controls (Themed) */
         .fixed-control {
             position: fixed;
@@ -229,17 +225,9 @@
             color: var(--color-primary-accent);
             transition: background 0.3s, color 0.3s;
         }
-        #muteBtn { 
-            right: 10px;
-        }
-        #backBtn { 
-            left: 10px; 
-            display: none;
-        }
-        #chatOpenBtn { 
-            right: 100px; 
-            display: none;
-        } 
+        #muteBtn { right: 10px; }
+        #backBtn { left: 10px; display: none; }
+        #chatOpenBtn { right: 100px; display: none; } 
 
         /* --- GAME BOARD --- */
         #game { 
@@ -267,16 +255,14 @@
             border-radius: 5px;
             transition: background 0.2s, color 0.2s;
         } 
-        .cell:hover { 
-            background: var(--color-cell-hover);
-        }
+        .cell:hover { background: var(--color-cell-hover); }
         .cell.winner { 
             background: var(--color-secondary-accent);
             box-shadow: 0 0 15px rgba(57, 255, 20, 0.8);
             color: var(--color-text-dark); /* Ensure contrast */
             animation: pulseWin 0.5s infinite alternate;
         } 
-
+        
         @keyframes pulseWin {
             from { box-shadow: 0 0 15px var(--color-secondary-accent); }
             to { box-shadow: 0 0 25px var(--color-secondary-accent); }
@@ -292,7 +278,7 @@
             margin-top: 5px;
             font-weight: 700;
         }
-
+        
         /* Scoreboard Panel */
         .scoreboard-panel {
             background: var(--color-panel-bg);
@@ -312,7 +298,7 @@
             margin: 5px 0;
             font-size: 0.9rem;
         }
-
+        
         /* --- CHAT OVERLAY --- */
         #chat-overlay {
             position: fixed;
@@ -335,7 +321,7 @@
         #chat-overlay.visible {
             transform: translateX(0);
         }
-
+        
         #chat-overlay h2 {
             margin-bottom: 5px;
             padding: 0 20px;
@@ -362,7 +348,7 @@
             background: rgba(0, 0, 0, 0.7);
             flex-shrink: 0;
         }
-
+        
         /* Reaction Emojis Style */
         #reaction-emojis {
             display: flex;
@@ -381,7 +367,7 @@
         #reaction-emojis button:hover {
             transform: scale(1.1);
         }
-
+        
         /* Chat text input and send button */
         #text-input-group {
             display: flex;
@@ -418,15 +404,13 @@
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.5);
             z-index: 1001;
         } 
-        footer b { 
-            color: #94a1b2;
-        } 
-
+        footer b { color: #94a1b2; } 
+        
         /* Specific Z-Index for Home Screen to ensure it sits above the standard screen index (100) */
         #home-screen {
             z-index: 101;
         }
-
+        
         /* Online Lobby Loading Status */
         #online-lobby-status {
             margin-top: 20px;
@@ -436,7 +420,7 @@
             font-style: italic;
             color: var(--color-primary-accent);
         }
-
+        
         /* Post Game Buttons */
         #post-game-actions {
             margin-top: 20px;
@@ -470,8 +454,7 @@
                 <button onclick="setTheme('light')">Light</button>
             </div>
             
-            <div id="main-controls" style="display: flex;
-flex-direction: column; align-items: center; margin-top: 50px;">
+            <div id="main-controls" style="display: flex; flex-direction: column; align-items: center; margin-top: 50px;">
                 <button onclick="showScreen('local-config')" class="neon-button">LOCAL 2-PLAYER</button>
                 <button onclick="showScreen('ai-config')" class="neon-button">PLAY AI</button> 
                 <button onclick="showScreen('online-lobby')" class="neon-button">ONLINE MULTIPLAYER</button>
@@ -491,8 +474,7 @@ flex-direction: column; align-items: center; margin-top: 50px;">
                 <button disabled>5x5 (N/A)</button>
             </div>
             
-             <input type="text" id="playerNameAIAI" placeholder="Your Name (X)" value="Player X" maxlength="15" style="margin: 20px auto;
-width: 80%;">
+             <input type="text" id="playerNameAIAI" placeholder="Your Name (X)" value="Player X" maxlength="15" style="margin: 20px auto; width: 80%;">
 
             <div id="aiDifficultyControls" style="margin-top: 15px;">
                 <h3>Select AI Difficulty (O)</h3>
@@ -514,9 +496,8 @@ width: 80%;">
                 <button onclick="setBoardSize(4, this)">4x4 (4-in-a-Row)</button>
                 <button onclick="setBoardSize(5, this)">5x5 (5-in-a-Row)</button>
             </div>
-            
-            <div id="playerNames" style="display: flex; flex-direction: column;
-margin: 20px 0;">
+          
+            <div id="playerNames" style="display: flex; flex-direction: column; margin: 20px 0;">
                 <input type="text" id="playerNameX" placeholder="Player X Name" value="Player X" maxlength="15" style="margin-bottom: 10px;">
                 <input type="text" id="playerNameO" placeholder="Player O Name" value="Player O" maxlength="15">
             </div>
@@ -553,8 +534,7 @@ margin: 20px 0;">
                     <div id="loading-spinner-online" style="margin-top: 10px;"></div>
                 </div>
 
-                <button onclick="showScreen('game-screen', true)" id="startGameOnlineBtn" style="display: none;
-margin-top: 20px;" class="active">GO TO GAME SCREEN</button>
+                <button onclick="showScreen('game-screen', true)" id="startGameOnlineBtn" style="display: none; margin-top: 20px;" class="active">GO TO GAME SCREEN</button>
             </div>
         </div>
     </div>
@@ -565,8 +545,7 @@ margin-top: 20px;" class="active">GO TO GAME SCREEN</button>
             
             <div id="player-names-display">
                 <p id="nameX" style="color: var(--color-primary-accent); display: inline-block; margin-right: 20px;">X: Player X</p>
-                <p id="nameO" style="color: var(--color-secondary-accent);
-display: inline-block;">O: Player O</p>
+                <p id="nameO" style="color: var(--color-secondary-accent); display: inline-block;">O: Player O</p>
             </div>
             
             <div id="game-info">
@@ -579,15 +558,13 @@ display: inline-block;">O: Player O</p>
             </div>
             
             <div id="post-game-actions" style="display: none;">
-                <button id="rematchBtn" class="neon-button" 
-onclick="handleRematch()">REMATCH</button>
+                <button id="rematchBtn" class="neon-button" onclick="handleRematch()">REMATCH</button>
             </div>
             
             <div id="scoreboard">
                 <div id="local-scoreboard" class="scoreboard-panel">
                     <h2>LOCAL SCORE</h2>
-                    <p><span id="nameScoreX">Player X</span>: <span 
-id="scoreX">0</span></p>
+                    <p><span id="nameScoreX">Player X</span>: <span id="scoreX">0</span></p>
                     <p><span id="nameScoreO">Player O</span>: <span id="scoreO">0</span></p>
                     <p>Draws: <span id="scoreDraws">0</span></p>
                 </div>
@@ -605,13 +582,13 @@ id="scoreX">0</span></p>
     <div id="chat-overlay">
         <h2>GAME CHAT</h2>
         <div id="chat-messages">
-            </div>
+        </div>
         <div id="chat-input-area">
             <div id="reaction-emojis">
                 <button onclick="sendChatMessage('😎', true)">😎</button>
-                 <button onclick="sendChatMessage('😂', true)">😂</button>
-                 <button onclick="sendChatMessage('😡', true)">😡</button>
-                 <button onclick="sendChatMessage('😢', true)">😢</button>
+                <button onclick="sendChatMessage('😂', true)">😂</button>
+                <button onclick="sendChatMessage('😡', true)">😡</button>
+                <button onclick="sendChatMessage('😢', true)">😢</button>
             </div>
             <div id="text-input-group">
                 <input type="text" id="chatInput" placeholder="Type a message..." maxlength="100">
@@ -621,8 +598,7 @@ id="scoreX">0</span></p>
     </div>
     
     <footer>
-        <p>Developed by <b>Seb-Creations</b> |
-XOX Arena</p>
+        <p>Developed by <b>Seb-Creations</b> | XOX Arena</p>
     </footer>
 
     <audio id="menuMusic" loop src="https://assets.mixkit.co/music/preview/mixkit-sci-fi-game-intro-2426.mp3" preload="auto"></audio> 
@@ -631,8 +607,9 @@ XOX Arena</p>
     <audio id="clickSound" src="https://assets.mixkit.co/sfx/preview/mixkit-game-button-click-1944.mp3" preload="auto"></audio>
     <audio id="winSound" src="https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-complete-2051.mp3" preload="auto"></audio>
     <audio id="drawSound" src="https://assets.mixkit.co/sfx/preview/mixkit-small-bell-bell-251.mp3" preload="auto"></audio>
-    
+
     <script>
+        
         // --- NEW SPLASH SCREEN HANDLER ---
         const LOADING_TIME_MS = 1000; // Reduced for testing/UX
 
@@ -641,10 +618,10 @@ XOX Arena</p>
         const splashScreen = document.getElementById('splash-screen');
         const playButton = document.getElementById('play-button');
         const loadingSpinner = document.getElementById('loading-spinner');
-
+        
         // CRITICAL INITIAL STATE: Make sure splash screen is visible on load.
         splashScreen.classList.add('active');
-
+        
         // --- FIREBASE CONFIGURATION (Unchanged) --- 
         const firebaseConfig = { 
             apiKey: "AIzaSyAFUoT40IjaiqH2791QvyNUP6SakHarupY", 
@@ -668,7 +645,7 @@ XOX Arena</p>
                 console.warn("Online multiplayer mode will not work.");
             }
         }
-
+        
         // --- GAME STATE VARIABLES ---
         let boardSize = 3;
         let board = Array(boardSize * boardSize).fill(''); 
@@ -680,7 +657,7 @@ XOX Arena</p>
         let localPlayer = null;
         let roomId = null; 
         let currentScreen = 'splash-screen'; 
-
+        
         // NEW: Player Names State
         let playerNames = {
             'X': 'Player X',
@@ -692,18 +669,16 @@ XOX Arena</p>
         const TIME_LIMIT_SECONDS = 30; // 30s countdown
         const TIMER_START_SECONDS = 0; // Timer starts immediately
         let autoResetTimeout = null;
-
+        
         // --- DOM Elements ---
         const gameDiv = document.getElementById('game'); 
         const aiControlsDiv = document.getElementById('aiDifficultyControls');
         const scoreX = document.getElementById('scoreX'); 
         const scoreO = document.getElementById('scoreO'); 
         const scoreDraws = document.getElementById('scoreDraws');
-
         // MUSIC ELEMENTS
         const menuMusic = document.getElementById('menuMusic'); 
         const gameMusic = document.getElementById('gameMusic');
-
         // SOUND EFFECT ELEMENTS
         const clickSound = document.getElementById('clickSound');
         const winSound = document.getElementById('winSound');
@@ -725,19 +700,17 @@ XOX Arena</p>
         const chatOpenBtn = document.getElementById('chatOpenBtn');
         const lobbyBoardSizeSpan = document.getElementById('lobbyBoardSize');
         const startGameOnlineBtn = document.getElementById('startGameOnlineBtn');
-        const gameTitle = document.getElementById('gameTitle');
-        const chatOverlay = document.getElementById('chat-overlay');
-        const postGameActionsDiv = document.getElementById('post-game-actions');
+        const onlineStatusP = document.getElementById('onlineStatus');
         const loadingSpinnerOnline = document.getElementById('loading-spinner-online');
-
-        // Player Name DOM
+        const gameTitle = document.getElementById('gameTitle');
         const nameXDisplay = document.getElementById('nameX');
         const nameODisplay = document.getElementById('nameO');
         const nameScoreX = document.getElementById('nameScoreX');
         const nameScoreO = document.getElementById('nameScoreO');
-
-        // --- THEME & MUTE HANDLERS ---
-
+        const chatOverlay = document.getElementById('chat-overlay');
+        const postGameActionsDiv = document.getElementById('post-game-actions');
+        
+        // --- UI & STATE HANDLERS ---
         function setTheme(theme) {
             if (theme === 'light') {
                 appBody.classList.add('light-theme');
@@ -749,17 +722,17 @@ XOX Arena</p>
                 document.querySelector('#theme-controls button:nth-child(2)').classList.remove('active');
             }
         }
-
+        
         function playMusic(audioElem, volume = 0.3) {
             if (!isMuted && audioElem && audioElem.paused) {
                 audioElem.volume = volume;
-                audioElem.currentTime = 0; 
+                audioElem.currentTime = 0;
                 audioElem.play().catch(e => console.log("Audio play prevented:", e));
             }
         }
-
+        
         function playSoundEffect(audioElem, volume = 0.8) {
-             if (audioElem && !isMuted) {
+            if (audioElem && !isMuted) {
                 audioElem.volume = volume;
                 audioElem.currentTime = 0; // Rewind to start for instant playback
                 audioElem.play().catch(e => console.log("Sound effect play prevented:", e));
@@ -771,11 +744,11 @@ XOX Arena</p>
                 audioElem.pause();
             }
         }
-
+        
         function manageMusic(screenId) {
             if (screenId === 'game-screen') {
                 stopMusic(menuMusic);
-                playMusic(gameMusic, 0.4); 
+                playMusic(gameMusic, 0.4);
             } else if (screenId === 'splash-screen' || screenId === 'home-screen' || screenId === 'online-lobby' || screenId === 'local-config' || screenId === 'ai-config') {
                 stopMusic(gameMusic);
                 playMusic(menuMusic, 0.3);
@@ -785,18 +758,6 @@ XOX Arena</p>
             }
         }
 
-        function toggleMute() {
-            isMuted = !isMuted;
-            if (isMuted) {
-                stopMusic(menuMusic);
-                stopMusic(gameMusic);
-            } else {
-                manageMusic(currentScreen);
-            }
-            
-            document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊'; 
-        } 
-
         /**
          * Handles the click on the "PLAY GAME" button, showing the spinner
          * and waiting for the loading time before transitioning to the home screen.
@@ -804,6 +765,7 @@ XOX Arena</p>
         function handlePlayClick() {
             if (playButton) playButton.style.display = 'none';
             if (loadingSpinner) loadingSpinner.style.display = 'block';
+
             // Initial music start (menuMusic will start)
             playMusic(menuMusic, 0.3);
 
@@ -821,40 +783,46 @@ XOX Arena</p>
         }
 
         // --- SCREEN MANAGEMENT ---
-        function showScreen(screenId, isGameStart = false) {
+        function showScreen(screenId, isGameScreen = false) {
             document.querySelectorAll('.screen').forEach(screen => {
                 screen.classList.remove('active');
+                screen.style.display = 'none';
             });
-            const screen = document.getElementById(screenId);
-            if (screen) {
-                screen.classList.add('active');
-                currentScreen = screenId;
-            }
             
-            // Manage fixed controls
+            const newScreen = document.getElementById(screenId);
+            if (newScreen) {
+                newScreen.style.display = 'flex';
+                // Wait briefly for display:flex to apply before adding active class for fade
+                setTimeout(() => {
+                    newScreen.classList.add('active');
+                }, 10); 
+            }
+
+            currentScreen = screenId;
+            
+            // UI Controls
+            backBtn.style.display = (screenId === 'home-screen' || screenId === 'splash-screen') ? 'none' : 'block';
+            timerDisplay.style.display = isGameScreen ? 'block' : 'none';
+            chatOpenBtn.style.display = (isGameScreen && mode === 'online') ? 'block' : 'none';
+            
+            manageMusic(screenId);
+            stopTimer();
+
+            // Screen-specific setup
             if (screenId === 'game-screen') {
-                backBtn.style.display = 'block';
-                chatOpenBtn.style.display = mode === 'online' ? 'block' : 'none';
-                
-                // This is a game start, so we reset the game state
-                if (isGameStart) {
-                    // Only reset if it's a new local/ai game start, not an online sync
-                    if (mode !== 'online') {
-                        // Read current names from config inputs
-                        playerNames['X'] = document.getElementById(mode === 'ai' ? 'playerNameAIAI' : 'playerNameX').value || 'Player X';
-                        playerNames['O'] = document.getElementById('playerNameO' in document.getElementById('local-config').querySelector('.screen-content') ? 'playerNameO' : 'AI Bot').value || 'Player O';
-                        if(mode === 'ai') playerNames['O'] = 'AI Bot (' + aiDifficulty.charAt(0).toUpperCase() + ')';
-                        
-                        resetGame(); // Perform game reset (board, turn, active=true)
-                    }
-                    // Set the timer for the first move
-                    resetLocalTimer(); 
-                }
-                
-                // Update display text on game screen
-                if (mode === 'local' || mode === 'ai') {
+                if (mode !== 'online') {
+                    localPlayer = null; // Reset local player for local/AI modes
+                    localScoreboardDiv.style.display = 'inline-block';
+                    onlineScoreboardDiv.style.display = 'none';
+                    // Load names from inputs
+                    playerNames['X'] = document.getElementById(mode === 'ai' ? 'playerNameAIAI' : 'playerNameX').value || 'Player X';
+                    playerNames['O'] = document.getElementById(mode === 'ai' ? 'playerNameAIAI' : 'playerNameO').value || 'Player O';
+                    if(mode === 'ai') playerNames['O'] = 'AI Bot (' + aiDifficulty.charAt(0).toUpperCase() + ')';
+                    
                     updatePlayerNamesDisplay();
                     gameTitle.textContent = mode === 'local' ? 'LOCAL FRIEND GAME' : `AI GAME (${aiDifficulty.toUpperCase()})`;
+                    drawBoard();
+                    resetLocalTimer(); // Start timer for first move
                 } else if (mode === 'online' && localPlayer) {
                     gameTitle.textContent = `ONLINE GAME (${playerNames[localPlayer]})`;
                     localScoreboardDiv.style.display = 'none';
@@ -862,35 +830,18 @@ XOX Arena</p>
                     document.getElementById('onlinePlayerName').disabled = true;
                     if (db && roomId) syncGame();
                 }
-
-            } else {
-                stopTimer();
-                backBtn.style.display = screenId !== 'home-screen' ? 'block' : 'none';
-                chatOpenBtn.style.display = 'none';
-                chatOverlay.classList.remove('visible'); // Close chat when leaving game screen
-                
-                // Configuration screens setup
-                if (screenId === 'local-config') {
-                    mode = 'local';
-                    setBoardSize(boardSize, document.getElementById('size3x3Btn'), false, 'local-config');
-                    startGame('local', null, document.getElementById('localPlayBtn'));
-                } else if (screenId === 'ai-config') {
-                    mode = 'ai';
-                    setBoardSize(3, document.getElementById('aiSize3x3Btn'), false, 'ai-config');
-                    startGame('ai', 'hard', document.querySelector('#aiDifficultyControls button:last-child')); // Default hard
-                } else if (screenId === 'online-lobby') {
-                    mode = 'online';
-                    document.getElementById('onlinePlayerName').disabled = false;
-                    setBoardSize(boardSize, document.getElementById('onlineSize3x3Btn'), false, 'online-lobby');
-                }
-            }
-            
-            // Manage music for the new screen
-            manageMusic(screenId);
-            
-            // On game screen, draw the board to reflect the current state
-            if (screenId === 'game-screen') {
-                drawBoard();
+            } else if (screenId === 'local-config') {
+                mode = 'local';
+                setBoardSize(boardSize, document.getElementById('size3x3Btn'), false, 'local-config');
+                startGame('local', null, document.getElementById('localPlayBtn'));
+            } else if (screenId === 'ai-config') {
+                mode = 'ai';
+                setBoardSize(3, document.getElementById('aiSize3x3Btn'), false, 'ai-config');
+                startGame('ai', 'hard', document.querySelector('#aiDifficultyControls button:last-child')); // Default hard
+            } else if (screenId === 'online-lobby') {
+                mode = 'online';
+                document.getElementById('onlinePlayerName').disabled = false;
+                setBoardSize(boardSize, document.getElementById('onlineSize3x3Btn'), false, 'online-lobby');
             }
         }
 
@@ -910,7 +861,6 @@ XOX Arena</p>
                 toggleChatOverlay();
                 return;
             }
-            
             stopTimer();
 
             if (currentScreen === 'game-screen') {
@@ -922,61 +872,32 @@ XOX Arena</p>
                     showScreen('local-config');
                 }
             } else if (currentScreen === 'online-lobby' || currentScreen === 'local-config' || currentScreen === 'ai-config') {
-                // If leaving online lobby, disconnect from Firebase
                 if (mode === 'online' && roomId && db) {
                     db.ref('games/' + roomId).off();
+                    db.ref('games/' + roomId).remove();
                     roomId = null;
                     localPlayer = null;
-                    startGameOnlineBtn.style.display = 'none';
-                    loadingSpinnerOnline.style.display = 'none';
                 }
-                showScreen('home-screen');
-            } else {
                 showScreen('home-screen');
             }
         }
 
         // --- TIMER LOGIC ---
-
-        function handleTimeLimitReached() {
-            if (gameActive) {
-                // Only opponent can time out
-                gameStatusP.innerHTML = `<strong>${playerNames[currentPlayer]} (${currentPlayer})</strong> timed out! 
-                <strong>${playerNames[getNextPlayer()]} (${getNextPlayer()})</strong> WINS!`;
-                updateLocalScore(getNextPlayer());
-                gameActive = false;
-                playSoundEffect(winSound);
-                drawBoard();
-                
-                // In AI mode, if the player (X) times out, start AI move immediately
-                if (mode === 'ai' && currentPlayer === 'X') {
-                    currentPlayer = 'O'; // Switch turn to AI for the win message
-                    drawBoard(); // Redraw for final message
-                }
-                
-            }
-        }
-
-        function getNextPlayer() {
-            return currentPlayer === 'X' ? 'O' : 'X';
-        }
-
-        function startTimer(startTime = localMoveStartTime) {
-            if (timerInterval) clearInterval(timerInterval);
-            if (!timerValueSpan) return;
-
+        function startTimer(startTime) {
+            stopTimer(); // Clear any existing timer
             timerInterval = setInterval(() => {
                 const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
                 const remainingSec = TIME_LIMIT_SECONDS - elapsedSec;
-
+                
                 if (remainingSec <= 0) {
                     stopTimer();
                     handleTimeLimitReached();
                     return;
                 }
-
+                
                 timerValueSpan.textContent = `${remainingSec}s`;
                 timerValueSpan.style.color = 'var(--color-text-light)';
+                
                 if (remainingSec <= 5) {
                     timerValueSpan.style.color = '#f05a7f'; // Critical Red
                 } else if (remainingSec <= 15) {
@@ -984,7 +905,7 @@ XOX Arena</p>
                 }
             }, 1000);
         }
-
+        
         function stopTimer() {
             if (timerInterval) {
                 clearInterval(timerInterval);
@@ -1006,6 +927,43 @@ XOX Arena</p>
             }
         }
 
+        function handleTimeLimitReached() {
+             if (mode === 'online') {
+                if (localPlayer === currentPlayer) {
+                    // Only the player whose turn it is updates the DB on timeout
+                    const loser = currentPlayer;
+                    const winner = loser === 'X' ? 'O' : 'X';
+                    
+                    db.ref('games/' + roomId).once('value', snapshot => {
+                        const gameState = snapshot.val();
+                        if (!gameState || !gameState.gameActive) return;
+
+                        let newScores = gameState.scores || { scoreX: 0, scoreO: 0, draws: 0 };
+                        if (winner === 'X') newScores.scoreX++;
+                        else if (winner === 'O') newScores.scoreO++;
+
+                        db.ref('games/' + roomId).update({
+                            gameActive: false,
+                            currentPlayer: winner, // Set winner as next player to start
+                            scores: newScores,
+                            lastMoveTime: firebase.database.ServerValue.TIMESTAMP // To trigger sync
+                        });
+                        sendChatMessage(`${playerNames[loser]} ran out of time! ${playerNames[winner]} wins the round.`, false, true);
+                    });
+                }
+            } else {
+                gameActive = false;
+                const loser = currentPlayer;
+                const winner = loser === 'X' ? 'O' : 'X';
+                
+                gameStatusP.innerHTML = `TIME OUT! <strong>${playerNames[loser]} (${loser})</strong> ran out of time. <strong>${playerNames[winner]} (${winner})</strong> WINS!`;
+                
+                updateLocalScore(winner);
+                playSoundEffect(winSound);
+                drawBoard();
+            }
+        }
+        
         // --- Core Game Logic Functions ---
         function getWinLength(size) {
             return size;
@@ -1014,56 +972,78 @@ XOX Arena</p>
         function setBoardSize(size, button, skipReset = false, location = 'local-config') {
             const previousSize = boardSize;
             boardSize = size;
-
             const newBoardLength = size * size;
+
             if (!skipReset && previousSize !== size) {
                 board = Array(newBoardLength).fill('');
             }
             
             gameDiv.style.gridTemplateColumns = `repeat(${size}, 1fr)`;
-
+            
+            // Calculate dynamic cell size for responsiveness
             let cellSize, fontSize;
             const containerWidth = Math.min(window.innerWidth * 0.95, 500);
             cellSize = (containerWidth / size) - (size === 3 ? 5 : 4);
             fontSize = cellSize / 2.5;
-
+            
             gameDiv.style.setProperty('--cell-size', `${cellSize}px`);
             gameDiv.style.setProperty('--font-size', `${fontSize}px`);
             gameDiv.style.setProperty('--board-size', size);
 
             // --- UI/Button Activation Logic ---
-            const sizeControlsId = location === 'local-config' ? 
-                'boardSizeControls' : (location === 'ai-config' ? 'aiBoardSizeControls' : 'onlineBoardSizeControls');
-
+            const sizeControlsId = location === 'online-lobby' ? 'onlineBoardSizeControls' : (location === 'ai-config' ? 'aiBoardSizeControls' : 'boardSizeControls');
             if (button) {
-                document.querySelectorAll(`#${sizeControlsId} button`).forEach(btn => {
-                    btn.classList.remove('active');
+                setActiveButton(sizeControlsId, button);
+            } else if (location === 'online-lobby') {
+                // If button is null, find and activate the correct button based on boardSize
+                document.getElementById(sizeControlsId).querySelectorAll('button').forEach(btn => {
+                    if (parseInt(btn.textContent.split('x')[0]) === size) {
+                        setActiveButton(sizeControlsId, btn);
+                    }
                 });
-                button.classList.add('active');
             }
-            
-            // Update lobby size display if in online lobby
-            if(location === 'online-lobby') {
+
+            // Update lobby display if applicable
+            if (location === 'online-lobby') {
                 lobbyBoardSizeSpan.textContent = `${size}x${size}`;
             }
+
+            if (!skipReset) {
+                drawBoard();
+            }
+        }
+        
+        function startGame(newMode, difficulty, button) {
+            mode = newMode;
+            if (difficulty) {
+                aiDifficulty = difficulty;
+                setActiveButton('aiDifficultyControls', button);
+            }
+            if (mode === 'local') {
+                setActiveButton('modeControls', button);
+            }
+            
+            // Set initial player names for the UI config
+            if (mode === 'ai') {
+                 playerNames['O'] = 'AI Bot (' + aiDifficulty.charAt(0).toUpperCase() + ')';
+            } else if (mode === 'local') {
+                 playerNames['X'] = document.getElementById('playerNameX').value || 'Player X';
+                 playerNames['O'] = document.getElementById('playerNameO').value || 'Player O';
+            }
+            updatePlayerNamesDisplay();
+            
+            // Reset game for new mode/difficulty
+            resetGame();
         }
 
-        /**
-         * Renders the current state of the board onto the HTML grid.
-         * Updates game status message and post-game actions.
-         */
-        function drawBoard() {
+        function drawBoard(finalResult = {}) {
             gameDiv.innerHTML = '';
-            
-            // Check winner only when drawing the board to update status
-            const finalResult = checkWinner(board, true);
-            
             board.forEach((val, i) => {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
                 cell.innerHTML = val ? `<strong>${val}</strong>` : ''; // Use strong for better visibility
                 cell.setAttribute('data-index', i);
-                
+
                 // NEW: Apply winning class
                 if (!gameActive && finalResult.winningIndices && finalResult.winningIndices.includes(i)) {
                     cell.classList.add('winner');
@@ -1081,88 +1061,73 @@ XOX Arena</p>
                     if (!gameActive) {
                         const result = checkWinner(board, false);
                         const winnerName = result.winner === localPlayer ? 'YOU' : (result.winner === 'Draw' ? 'IT' : 'OPPONENT');
-                        gameStatusP.innerHTML = `GAME OVER!
-                        ${result.winner === 'Draw' ? 'IT\'S A DRAW!' : `<strong>${result.winner} (${winnerName})</strong> WINS!`}. Starting new round in 3 seconds...`;
-                        if(result.winner === 'Draw') playSoundEffect(drawSound);
-                        else playSoundEffect(winSound);
+                        gameStatusP.innerHTML = `GAME OVER! ${result.winner === 'Draw' ? 'IT\'S A DRAW!' : `<strong>${result.winner} (${winnerName})</strong> WINS!`}. Starting new round in 3 seconds...`;
+                        if(result.winner === 'Draw') playSoundEffect(drawSound); else playSoundEffect(winSound);
                         stopTimer();
                     } else {
                         const turnPlayerName = playerNames[currentPlayer] || currentPlayer;
                         const turnMessage = (currentPlayer === localPlayer) ? 'YOUR TURN!' : `${turnPlayerName}'S TURN.`;
-                        gameStatusP.innerHTML = `YOU ARE <strong>${localPlayer} (${playerNames[localPlayer]})</strong>.
-                        IT IS <strong>${turnMessage}</strong>`;
+                        gameStatusP.innerHTML = `YOU ARE <strong>${localPlayer} (${playerNames[localPlayer]})</strong>. IT IS <strong>${turnMessage}</strong>`;
                     }
                 } else if (gameActive) {
                     gameStatusP.innerHTML = `<strong>${playerNames[currentPlayer]} (${currentPlayer})</strong>'S TURN.`;
                 } else {
                     const result = checkWinner(board, false);
                     const winnerName = playerNames[result.winner] || result.winner;
-                    gameStatusP.innerHTML = `GAME OVER!
-                    ${result.winner === 'Draw' ? 'IT\'S A DRAW!' : `<strong>${result.winner} (${winnerName})</strong> WINS!`}.`;
-                    if(result.winner === 'Draw') playSoundEffect(drawSound);
-                    else playSoundEffect(winSound);
-                    stopTimer();
+                    gameStatusP.innerHTML = `GAME OVER! ${result.winner === 'Draw' ? 'IT\'S A DRAW!' : `<strong>${result.winner} (${winnerName})</strong> WINS!`}.`;
+                }
+
+                if (mode === 'ai' && gameActive && currentPlayer === 'O') {
+                    // Force the AI move if it's its turn
+                    setTimeout(aiMove, 500); // Small delay for UX
                 }
             }
         }
-
+        
         function handleClick(index) {
-            if (!gameActive || board[index]) return;
-            playSoundEffect(clickSound);
-
+            if (!gameActive || board[index] !== '') return;
+            
             if (mode === 'online') {
-                if (currentPlayer === localPlayer) {
-                    handleOnlineMove(index);
-                } else {
-                    gameStatusP.innerHTML = `Wait for <strong>${playerNames[currentPlayer]} (${currentPlayer})</strong>'s turn.`;
+                if (currentPlayer !== localPlayer) {
+                    console.log("Not your turn!");
+                    return;
                 }
+                handleOnlineMove(index);
             } else {
-                // Local or AI game move
+                // Local/AI Mode
                 board[index] = currentPlayer;
-                
+                playSoundEffect(clickSound, 0.5);
                 const result = checkWinner(board, true);
                 
                 if (result.winner) {
                     gameActive = false;
-                    drawBoard(); // Draw board one last time to show win/draw state
+                    drawBoard(result); // Pass result to highlight winners
                     updateLocalScore(result.winner);
-                    // AI move is prevented by gameActive = false, so no need for extra check
+                    if(result.winner === 'Draw') playSoundEffect(drawSound); else playSoundEffect(winSound);
                 } else {
                     currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                    resetLocalTimer(); // Reset timer on successful move
                     drawBoard();
-                    
-                    // AI Logic: If it's AI's turn (O) and the game is still active
-                    if (mode === 'ai' && currentPlayer === 'O') {
-                        setTimeout(aiMove, 500); // 500ms delay for better UX
-                    }
+                    resetLocalTimer();
                 }
             }
         }
-
-        /**
-         * Checks the current board state for a winner.
-         * @param {string[]} currentBoard - The board array.
-         * @param {boolean} updateGlobalState - Whether to update gameActive and stop the timer.
-         * @returns {{winner: ('X'|'O'|'Draw'|null), winningIndices: number[]}}
-         */
-        function checkWinner(currentBoard, updateGlobalState) {
+        
+        function checkWinner(currentBoard, updateGlobalState = true) {
             const size = boardSize;
-            const N = getWinLength(size); 
+            const N = getWinLength(size);
             
-            // Helper function to convert 2D index (r, c) to 1D index
             const index = (r, c) => r * size + c;
             const isValid = (r, c) => r >= 0 && r < size && c >= 0 && c < size;
 
-            // Helper function to check a line starting at (r, c) with direction (dr, dc)
             const checkLine = (r, c, dr, dc) => {
                 const player = currentBoard[index(r, c)];
                 if (!player) return null;
-
+                
                 let winningIndices = [index(r, c)];
                 for (let k = 1; k < N; k++) {
                     const nr = r + k * dr;
                     const nc = c + k * dc;
+                    
                     if (!isValid(nr, nc) || currentBoard[index(nr, nc)] !== player) {
                         return null;
                     }
@@ -1171,7 +1136,6 @@ XOX Arena</p>
                 return { winner: player, winningIndices };
             };
 
-            // Check all possible starting positions and directions
             const directions = [
                 [0, 1], // Horizontal
                 [1, 0], // Vertical
@@ -1196,7 +1160,6 @@ XOX Arena</p>
                 }
             }
             
-            // Check for Draw
             if (!currentBoard.includes('')) {
                 if (updateGlobalState) {
                     gameActive = false;
@@ -1205,7 +1168,7 @@ XOX Arena</p>
                 return { winner: 'Draw' };
             }
 
-            return {}; // Game in progress
+            return {};
         }
 
         function updateLocalScore(winner) {
@@ -1213,7 +1176,7 @@ XOX Arena</p>
             else if (winner === 'O') scoreO.textContent = +scoreO.textContent + 1;
             else if (winner === 'Draw') scoreDraws.textContent = +scoreDraws.textContent + 1;
         }
-
+        
         function updateOnlineScoreboard(scores) {
             const localWinCount = localPlayer === 'X' ? scores.scoreX : scores.scoreO;
             const opponentWinCount = localPlayer === 'X' ? scores.scoreO : scores.scoreX;
@@ -1233,13 +1196,6 @@ XOX Arena</p>
             resetLocalTimer();
         }
 
-        function handleRematch() {
-            if (mode !== 'online') {
-                resetGame();
-                drawBoard();
-            }
-        }
-
         function setActiveButton(containerId, activeButton) {
             document.querySelectorAll(`#${containerId} button`).forEach(btn => {
                 btn.classList.remove('active');
@@ -1248,50 +1204,37 @@ XOX Arena</p>
                 activeButton.classList.add('active');
             }
         }
-
-        function startGame(selectedMode, difficulty, button) {
-            mode = selectedMode;
-            setActiveButton('modeControls', null);
-            setActiveButton('aiDifficultyControls', null);
-            if(button) {
-                button.classList.add('active');
-            }
-            
-            if (mode === 'ai') {
-                aiDifficulty = difficulty;
-            }
+        
+        function handleRematch() {
+            resetGame();
         }
+        
+        // --- CHAT LOGIC ---
+        function sendChatMessage(message = null, isReaction = false, isSystem = false) {
+            if (!db || !roomId) return;
 
-        // --- ONLINE FIREBASE LOGIC ---
+            const finalMessage = message || chatInput.value.trim();
+            if (!finalMessage) return;
 
-        function sendChatMessage(message = null, isReaction = false) {
-            if (!db || !roomId || !localPlayer) {
-                // If not in an online game, do nothing or show a message
-                console.warn("Not connected to an online game.");
-                if (chatInput) chatInput.value = '';
-                return;
-            }
+            const sender = isSystem ? 'System' : localPlayer;
             
-            const msg = message || chatInput.value.trim();
-            if (msg === '') return;
-
             db.ref('games/' + roomId + '/chat').push({
-                sender: localPlayer,
-                message: msg,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
-                isReaction: isReaction 
+                sender: sender,
+                message: finalMessage,
+                isReaction: isReaction || false,
+                timestamp: firebase.database.ServerValue.TIMESTAMP
             });
-            
-            if (chatInput) chatInput.value = '';
-        }
 
+            if(!isSystem) chatInput.value = '';
+        }
+        
         function syncChat() {
             if (!db || !roomId) return;
             
-            // Clear previous listener and messages
+            // Clear previous listeners and messages
             db.ref('games/' + roomId + '/chat').off();
             chatMessages.innerHTML = '';
-
+            
             db.ref('games/' + roomId + '/chat').on('child_added', snapshot => {
                 const messageData = snapshot.val();
                 const sender = messageData.sender;
@@ -1300,19 +1243,19 @@ XOX Arena</p>
                 const isReaction = messageData.isReaction || false;
                 
                 const msgElement = document.createElement('p');
-                
                 if(isReaction) {
                     msgElement.innerHTML = `<span class="chat-message-system">${senderName} sent a reaction:</span> <span style="font-size: 1.2rem;">${message}</span>`;
                 } else {
                     msgElement.textContent = `[${senderName}]: ${message}`;
                 }
                 
-                msgElement.className = sender === 'X' ? 'chat-message-x' : 'chat-message-o';
+                msgElement.className = sender === 'X' ? 'chat-message-x' : (sender === 'O' ? 'chat-message-o' : 'chat-message-system');
                 chatMessages.appendChild(msgElement);
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             });
         }
-
+        
+        // --- ONLINE MULTIPLAYER LOGIC ---
         function generateRoomId() {
             return Math.random().toString(36).substring(2, 8).toUpperCase();
         }
@@ -1323,7 +1266,6 @@ XOX Arena</p>
             localPlayer = 'X';
             playerNames['X'] = document.getElementById('onlinePlayerName').value.trim() || 'Player X';
             playerNames['O'] = 'Waiting...';
-            
             loadingSpinnerOnline.style.display = 'block';
 
             db.ref('games/' + roomId).set({
@@ -1335,11 +1277,7 @@ XOX Arena</p>
                 playerO: false,
                 playerXName: playerNames['X'],
                 playerOName: playerNames['O'],
-                scores: {
-                    scoreX: 0,
-                    scoreO: 0,
-                    draws: 0
-                },
+                scores: { scoreX: 0, scoreO: 0, draws: 0 },
                 lastMoveTime: firebase.database.ServerValue.TIMESTAMP
             }).then(() => {
                 document.getElementById('onlineStatus').innerHTML = `Game created! Your ID is: <strong>${roomId}</strong>. Waiting for Player O...`;
@@ -1348,7 +1286,6 @@ XOX Arena</p>
                 document.getElementById('onlineScoreLocal').textContent = '0';
                 document.getElementById('onlineScoreOpponent').textContent = '0';
                 document.getElementById('onlineScoreDraws').textContent = '0';
-                
                 syncGame();
                 syncChat();
                 loadingSpinnerOnline.style.display = 'none';
@@ -1367,65 +1304,64 @@ XOX Arena</p>
                 document.getElementById('onlineStatus').textContent = "Please enter a Room ID.";
                 return;
             }
-            
             loadingSpinnerOnline.style.display = 'block';
-
+            
             db.ref('games/' + roomId).once('value', snapshot => {
-                const gameState = snapshot.val();
-                if (snapshot.exists() && !gameState.playerO) {
+                if (snapshot.exists() && !snapshot.val().playerO) {
                     localPlayer = 'O';
-                    playerNames['X'] = gameState.playerXName || 'Player X';
-                    
+                    const gameState = snapshot.val();
+                    playerNames['X'] = gameState.playerXName;
+
                     db.ref('games/' + roomId).update({
                         playerO: true,
-                        playerOName: playerNames['O']
+                        playerOName: playerNames['O'],
+                        lastMoveTime: firebase.database.ServerValue.TIMESTAMP
                     }).then(() => {
-                        document.getElementById('onlineStatus').textContent = `Joined game ${roomId}! Wait for Player X to start.`;
+                        onlineStatusP.textContent = `Joined game ${roomId}!`;
                         startGameOnlineBtn.style.display = 'block';
-                        syncGame();
-                        syncChat();
+                        loadingSpinnerOnline.style.display = 'none';
+                        showScreen('game-screen', true);
+                    }).catch(e => {
+                        onlineStatusP.textContent = `Error joining game: ${e.message}`;
                         loadingSpinnerOnline.style.display = 'none';
                     });
-                } else if (snapshot.exists() && gameState.playerO) {
-                    document.getElementById('onlineStatus').textContent = "Room is full or game is already active.";
-                    loadingSpinnerOnline.style.display = 'none';
                 } else {
-                    document.getElementById('onlineStatus').textContent = "Room ID not found.";
+                    onlineStatusP.textContent = "Room does not exist or is full.";
                     loadingSpinnerOnline.style.display = 'none';
                 }
-            }).catch(e => {
-                document.getElementById('onlineStatus').textContent = `Error joining game: ${e.message}`;
-                loadingSpinnerOnline.style.display = 'none';
             });
         }
 
         function syncGame() {
-            if (!db || !roomId || !localPlayer) return;
-
+            if (!db || !roomId) return;
+            
+            db.ref('games/' + roomId).off(); // Stop previous sync
             db.ref('games/' + roomId).on('value', snapshot => {
-                const gameState = snapshot.val();
-                if (!gameState) {
-                    document.getElementById('onlineStatus').textContent = "Game disconnected or deleted.";
-                    loadingSpinnerOnline.style.display = 'none';
-                    db.ref('games/' + roomId).off();
-                    handleBack(false); // Go back to home screen
+                if (!snapshot.exists()) {
+                    // Game was deleted (e.g., by opponent leaving)
+                    db.ref('games/' + roomId).off(); 
+                    if (currentScreen === 'game-screen' || currentScreen === 'online-lobby') {
+                        alert("Opponent disconnected or the room was closed. Returning to lobby.");
+                        showScreen('online-lobby');
+                        onlineStatusP.textContent = "Opponent disconnected. Please create or join a new game.";
+                    }
                     return;
                 }
+
+                const gameState = snapshot.val();
                 
-                // Update local state from Firebase
-                currentPlayer = gameState.currentPlayer;
+                // Update local names and board size from the host's state
                 playerNames['X'] = gameState.playerXName || 'Player X';
                 playerNames['O'] = gameState.playerOName || 'Waiting...';
-                
                 if (gameState.boardSize && gameState.boardSize !== boardSize) {
                     setBoardSize(gameState.boardSize, null, true);
                 }
-
+                
                 const prevGameActive = gameActive;
                 board = gameState.board;
                 currentPlayer = gameState.currentPlayer;
                 gameActive = gameState.gameActive;
-
+                
                 // Timer Logic
                 if (gameState.lastMoveTime && gameActive && localPlayer === currentPlayer) {
                     startTimer(gameState.lastMoveTime);
@@ -1437,12 +1373,11 @@ XOX Arena</p>
                     updateOnlineScoreboard(gameState.scores);
                 }
                 
-                drawBoard(); // Redraw board with new state
-
+                drawBoard(); 
+                
                 // Auto-reset logic (only X handles this)
                 if (prevGameActive && !gameActive) {
                     if (autoResetTimeout) clearTimeout(autoResetTimeout);
-                    
                     autoResetTimeout = setTimeout(() => {
                         if (localPlayer === 'X') {
                             db.ref('games/' + roomId).once('value', currentSnapshot => {
@@ -1459,11 +1394,10 @@ XOX Arena</p>
                         }
                     }, 3000);
                 }
-                
+
                 // Check if opponent has joined
                 if (currentScreen === 'online-lobby' && gameState.playerO && localPlayer === 'X') {
-                    document.getElementById('onlineStatus').innerHTML = `Opponent (${playerNames['O']}) has joined!
-                    Click 'Go to Game'.`;
+                    document.getElementById('onlineStatus').innerHTML = `Opponent (${playerNames['O']}) has joined! Click 'Go to Game'.`;
                 }
             });
         }
@@ -1471,7 +1405,6 @@ XOX Arena</p>
         function handleOnlineMove(index) {
             if (!db) return;
             
-            // Optimistic local update for responsiveness
             const tempBoard = board.slice();
             tempBoard[index] = localPlayer;
             
@@ -1483,49 +1416,71 @@ XOX Arena</p>
                 const gameState = snapshot.val();
                 
                 let newScores = gameState.scores || { scoreX: 0, scoreO: 0, draws: 0 };
-                let updateData = { 
+                let updateData = {
                     board: tempBoard,
                     currentPlayer: nextPlayer,
-                    gameActive: true,
                     lastMoveTime: firebase.database.ServerValue.TIMESTAMP
                 };
 
-                if (result.winner || result.winner === 'Draw') {
+                if (result.winner) {
                     updateData.gameActive = false;
                     
-                    // Update score
-                    if (result.winner === 'X') newScores.scoreX += 1;
-                    else if (result.winner === 'O') newScores.scoreO += 1;
-                    else if (result.winner === 'Draw') newScores.draws += 1;
+                    if (result.winner === 'X') newScores.scoreX++;
+                    else if (result.winner === 'O') newScores.scoreO++;
+                    else if (result.winner === 'Draw') newScores.draws++;
+                    
                     updateData.scores = newScores;
                 }
                 
-                // Only allow the move if the game is active and it's this player's turn
-                if (gameState.gameActive && gameState.currentPlayer === localPlayer) {
-                     db.ref('games/' + roomId).update(updateData);
-                }
+                db.ref('games/' + roomId).update(updateData);
+                playSoundEffect(clickSound, 0.5);
             });
         }
-
-        // --- AI MINIMAX LOGIC (3x3 only) ---
-
+        
+        // --- AI LOGIC (Minimax for Hard) ---
         function getEmptyIndices(currentBoard) {
-            return currentBoard.map((val, i) => val === '' ? i : null).filter(val => val !== null);
+            return currentBoard.map((val, i) => val === '' ? i : -1).filter(i => i !== -1);
         }
 
-        function getScore(currentBoard) {
-            const result = checkWinner(currentBoard, false);
-            if (result.winner === 'X') return -10;
-            if (result.winner === 'O') return 10;
-            if (result.winner === 'Draw') return 0;
+        // Check winner used by Minimax (must not update global state)
+        function checkTerminal(currentBoard) {
+            const size = 3; // Minimax is only for 3x3
+            const N = 3;
+            
+            const index = (r, c) => r * size + c;
+            const checkLine = (r, c, dr, dc) => {
+                const player = currentBoard[index(r, c)];
+                if (!player) return null;
+                for (let k = 1; k < N; k++) {
+                    const nr = r + k * dr;
+                    const nc = c + k * dc;
+                    if (nr < 0 || nr >= size || nc < 0 || nc >= size || currentBoard[index(nr, nc)] !== player) {
+                        return null;
+                    }
+                }
+                return player;
+            };
+
+            const directions = [ [0, 1], [1, 0], [1, 1], [1, -1] ];
+            for (let r = 0; r < size; r++) {
+                for (let c = 0; c < size; c++) {
+                    if (currentBoard[index(r, c)]) {
+                        for (let [dr, dc] of directions) {
+                            const winner = checkLine(r, c, dr, dc);
+                            if (winner) return winner;
+                        }
+                    }
+                }
+            }
+            if (!currentBoard.includes('')) return 'Draw';
             return null; // Game is not over
         }
 
         function minimax(currentBoard, player) {
-            const score = getScore(currentBoard);
-            if (score !== null) {
-                return score;
-            }
+            let result = checkTerminal(currentBoard);
+            if (result === 'X') return -10; // X is minimizing player
+            if (result === 'O') return 10; // O is maximizing player
+            if (result === 'Draw') return 0;
 
             if (player === 'O') {
                 let bestScore = -Infinity;
@@ -1564,45 +1519,63 @@ XOX Arena</p>
             }
             return move;
         }
-
+        
         function aiMove() {
             if (!gameActive || currentPlayer !== 'O' || boardSize !== 3) return;
-
-            stopTimer();
+            stopTimer(); // Stop timer while AI thinks
             playSoundEffect(clickSound, 0.5);
 
             let empty = getEmptyIndices(board);
             let move = -1;
-
+            
             if (aiDifficulty === 'easy') {
-                move = empty[Math.floor(Math.random() * empty.length)];
+                // Easy: Random move
+                let randomIndex = Math.floor(Math.random() * empty.length);
+                move = empty[randomIndex];
             } else if (aiDifficulty === 'normal') {
-                // Normal: 30% chance of random move, 70% chance of hard move
-                if (Math.random() < 0.3) {
-                    move = empty[Math.floor(Math.random() * empty.length)];
-                } else {
-                    move = getBestMove(board);
-                }
+                 // Normal: Randomly choose between a winning/blocking move (Minimax level 1) or a random move
+                 if (Math.random() < 0.7) { // 70% chance to play smart
+                     move = getBestMove(board);
+                 } else { // 30% chance for random move
+                     let randomIndex = Math.floor(Math.random() * empty.length);
+                     move = empty[randomIndex];
+                 }
             } else if (aiDifficulty === 'hard') {
+                // Hard: Minimax Algorithm
                 move = getBestMove(board);
             }
-            
+
             if (move !== -1) {
                 board[move] = 'O';
-                const result = checkWinner(board, true);
                 
+                const result = checkWinner(board, true);
                 if (result.winner) {
                     gameActive = false;
-                    drawBoard();
+                    drawBoard(result);
                     updateLocalScore(result.winner);
+                    if(result.winner === 'Draw') playSoundEffect(drawSound); else playSoundEffect(winSound);
                 } else {
                     currentPlayer = 'X';
-                    resetLocalTimer();
                     drawBoard();
+                    resetLocalTimer();
                 }
             }
         }
 
+        // --- MUTE/MUSIC CONTROL ---
+        function toggleMute() {
+            isMuted = !isMuted;
+            
+            if (isMuted) {
+                stopMusic(menuMusic);
+                stopMusic(gameMusic);
+            } else {
+                manageMusic(currentScreen);
+            }
+            
+            document.getElementById('muteBtn').textContent = isMuted ? '🔇' : '🔊'; 
+        } 
+        
         // --- JAVASCRIPT FIX FOR MOBILE VH SCROLLING ---
         let resizeTimer; 
 
@@ -1621,7 +1594,7 @@ XOX Arena</p>
         });
         window.addEventListener('orientationchange', setAppHeight);
         setAppHeight(); 
-
+        
         // Initial setup for local/AI buttons on first load
         document.addEventListener('DOMContentLoaded', () => {
              setBoardSize(3, document.getElementById('size3x3Btn'), false, 'local-config');
@@ -1633,6 +1606,7 @@ XOX Arena</p>
              // Set initial mute state
              toggleMute(); // Mute by default until user interacts (browser policy)
         });
+        
     </script>
 </body>
 </html>
