@@ -231,10 +231,11 @@
         /* NEW: Chat Open Button with Badge Styling */
         #chatOpenBtn { 
             right: 100px; 
-            display: none; 
             position: relative;
             padding: 8px 15px;
             color: var(--color-secondary-accent); /* Make chat icon neon green */
+            /* CRITICAL FIX: The JS controls the display property */
+            display: none; 
         } 
         
         #chatOpenBtn:hover {
@@ -486,6 +487,7 @@
     
     <button id="muteBtn" onclick="toggleMute()" class="fixed-control">🔊</button>
     <button id="backBtn" onclick="handleBack(true)" class="fixed-control">← Back</button>
+    
     <button id="chatOpenBtn" onclick="toggleChatOverlay()" class="fixed-control">
         💬 Chat
         <span id="chatBadge">0</span>
@@ -888,6 +890,7 @@
             // Exit Online button logic
             exitOnlineBtn.style.display = isOnlineModeActive && screenId !== 'home-screen' ? 'block' : 'none'; 
 
+            // CRITICAL CHAT BUTTON VISIBILITY LOGIC (FIXED)
             // Chat button is visible in online-lobby and game-screen if a room is active
             chatOpenBtn.style.display = (isOnlineModeActive && (screenId === 'game-screen' || screenId === 'online-lobby')) ? 'block' : 'none';
             if (!isOnlineModeActive) {
